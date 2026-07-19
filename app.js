@@ -2388,13 +2388,20 @@
 
       <h2 class="section-title">Manage</h2>
       <div class="card">
-        <p class="muted" style="margin-top:0">Your progress is saved automatically on this device, and a backup file downloads once a week by itself. You can also export one manually or reset everything.</p>
+        <p class="muted" style="margin-top:0">Your progress is saved automatically on this device, and a backup file downloads once a week by itself. You can also export one manually.</p>
         <div class="btn-row">
           <button class="btn btn-ghost" data-export>${ic("download")} Export backup</button>
           <button class="btn btn-ghost" data-import>${ic("upload")} Import backup</button>
-          <button class="btn btn-ghost" data-reset style="color:var(--accent-2)">${ic("reset")} Reset all progress</button>
         </div>
         <input type="file" id="importFile" accept="application/json" class="hidden">
+      </div>
+
+      <h2 class="section-title">Start over</h2>
+      <div class="card">
+        <p class="muted" style="margin-top:0">Wipe everything on <b>this device</b> and begin from zero — streak, XP, learned words, scores and notes all reset to 0. App updates never do this; only this button does. It won't affect anyone else's progress.</p>
+        <div class="btn-row">
+          <button class="btn btn-ghost" data-reset style="color:var(--accent-2);border-color:#e0bcb2">${ic("reset")} Refresh entire database — start from zero</button>
+        </div>
       </div>`;
 
     const SAMPLE = "Bonjour ! Comment allez-vous ? Les amis arrivent à trois heures.";
@@ -2415,9 +2422,11 @@
     view.querySelector("[data-import]").addEventListener("click", () => $("#importFile").click());
     $("#importFile").addEventListener("change", importData);
     view.querySelector("[data-reset]").addEventListener("click", () => {
-      if (confirm("Reset ALL progress? This can't be undone.")) {
-        state = defaultState(); save(); refreshChrome(); go("home"); toast("Progress reset");
-      }
+      if (!confirm("Start over from zero?\n\nThis erases your streak, XP, learned words, scores and notes on THIS device — everything back to 0. It can't be undone.\n\n(Nobody else's progress is affected.)")) return;
+      if (confirm("Download a safety backup first? (recommended)\n\nOK = save a backup, then reset.\nCancel = reset without a backup.")) exportData();
+      state = defaultState();
+      ensureClasses(); syncClassDeck(); buildLex();
+      save(); refreshChrome(); go("home"); toast("Fresh start — bonne chance !");
     });
   };
 
