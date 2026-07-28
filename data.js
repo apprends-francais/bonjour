@@ -243,6 +243,52 @@ const DATA = {
         { fr: "facile", en: "easy", pos: "adj" },
         { fr: "difficile", en: "difficult", pos: "adj" }
       ]
+    },
+    {
+      id: "nationalities",
+      name: "Nationalities",
+      blurb: "Say where you're from — masculine / feminine forms.",
+      cards: [
+        { fr: "français / française", en: "French", pos: "adj", ex: { fr: "Il est français.", en: "He is French." } },
+        { fr: "canadien / canadienne", en: "Canadian", pos: "adj", ex: { fr: "Je suis canadienne.", en: "I am Canadian. (a woman speaking)" } },
+        { fr: "malaisien / malaisienne", en: "Malaysian", pos: "adj", ex: { fr: "Elle est malaisienne.", en: "She is Malaysian." } },
+        { fr: "américain / américaine", en: "American", pos: "adj" },
+        { fr: "anglais / anglaise", en: "English", pos: "adj" },
+        { fr: "espagnol / espagnole", en: "Spanish", pos: "adj" },
+        { fr: "italien / italienne", en: "Italian", pos: "adj" },
+        { fr: "allemand / allemande", en: "German", pos: "adj" },
+        { fr: "chinois / chinoise", en: "Chinese", pos: "adj" },
+        { fr: "japonais / japonaise", en: "Japanese", pos: "adj" },
+        { fr: "marocain / marocaine", en: "Moroccan", pos: "adj" },
+        { fr: "indien / indienne", en: "Indian", pos: "adj" },
+        { fr: "suisse", en: "Swiss (same for both)", pos: "adj" },
+        { fr: "belge", en: "Belgian (same for both)", pos: "adj" },
+        { fr: "la nationalité", en: "nationality", pos: "noun", g: "f", ex: { fr: "Quelle est ta nationalité ?", en: "What is your nationality?" } },
+        { fr: "le pays", en: "country", pos: "noun", g: "m" }
+      ]
+    },
+    {
+      id: "professions",
+      name: "Jobs & Professions",
+      blurb: "Talk about work — and remember: no article after il est.",
+      cards: [
+        { fr: "le professeur / la professeure", en: "teacher", pos: "noun", g: "m", ex: { fr: "Il est professeur.", en: "He is a teacher. (no article!)" } },
+        { fr: "l'étudiant / l'étudiante", en: "student", pos: "noun", g: "m", ex: { fr: "C'est une étudiante.", en: "She's a student. (with c'est you need the article)" } },
+        { fr: "le médecin", en: "doctor", pos: "noun", g: "m", ex: { fr: "Elle est médecin.", en: "She is a doctor." } },
+        { fr: "l'ingénieur / l'ingénieure", en: "engineer", pos: "noun", g: "m" },
+        { fr: "l'avocat / l'avocate", en: "lawyer", pos: "noun", g: "m" },
+        { fr: "l'infirmier / l'infirmière", en: "nurse", pos: "noun", g: "m" },
+        { fr: "le serveur / la serveuse", en: "waiter / waitress", pos: "noun", g: "m" },
+        { fr: "le vendeur / la vendeuse", en: "salesperson", pos: "noun", g: "m" },
+        { fr: "le cuisinier / la cuisinière", en: "cook / chef", pos: "noun", g: "m" },
+        { fr: "le journaliste / la journaliste", en: "journalist", pos: "noun", g: "m" },
+        { fr: "l'artiste", en: "artist", pos: "noun", g: "m" },
+        { fr: "le coiffeur / la coiffeuse", en: "hairdresser", pos: "noun", g: "m" },
+        { fr: "le boulanger / la boulangère", en: "baker", pos: "noun", g: "m" },
+        { fr: "l'informaticien / l'informaticienne", en: "IT worker", pos: "noun", g: "m" },
+        { fr: "le travail", en: "work / job", pos: "noun", g: "m" },
+        { fr: "les coordonnées", en: "contact details", pos: "noun", g: "pl", ex: { fr: "Quelles sont tes coordonnées ?", en: "What are your contact details?" } }
+      ]
     }
   ],
 
@@ -341,7 +387,81 @@ const DATA = {
             <tr><td>vous avez</td><td>you have</td></tr><tr><td>ils ont</td><td>they have</td></tr>
           </table>
         </div>
+        <p>The full set, including <b>elle</b> and <b>elles</b>:</p>
+        <div class="g-cols">
+          <table class="g-table"><tr><th colspan="2">être</th></tr>
+            <tr><td>je suis</td><td>I am</td></tr><tr><td>tu es</td><td>you are</td></tr>
+            <tr><td>il / elle <b>est</b></td><td>he / she is</td></tr><tr><td>nous <b>sommes</b></td><td>we are</td></tr>
+            <tr><td>vous <b>êtes</b></td><td>you are</td></tr><tr><td>ils / elles sont</td><td>they are</td></tr>
+          </table>
+          <table class="g-table"><tr><th colspan="2">avoir</th></tr>
+            <tr><td>j'ai</td><td>I have</td></tr><tr><td>tu as</td><td>you have</td></tr>
+            <tr><td>il / elle a</td><td>he / she has</td></tr><tr><td>nous avons</td><td>we have</td></tr>
+            <tr><td>vous avez</td><td>you have</td></tr><tr><td>ils / elles ont</td><td>they have</td></tr>
+          </table>
+        </div>
+        <p class="tip">⚠︎ Three traps to watch in <b>être</b>: it's <b>il est</b> / <b>elle est</b> (never “il son”) · <b>nous sommes</b> with the <b>-s</b> (not “nous somme”) · <b>vous êtes</b> with the accent on the ê. Only <b>ils/elles sont</b> uses “sont”.</p>
         <p class="tip">💡 French uses <b>avoir</b> for age: “J'ai vingt ans” = literally “I have twenty years”.</p>`
+    },
+    {
+      id: "cest-vs-il-est",
+      title: "c'est vs il / elle est — the article rule",
+      summary: "The one decides whether you need un/une/le/la, the other forbids it.",
+      body: `
+        <p>Both mean roughly “this is / he is”, but they take <b>opposite</b> grammar:</p>
+        <table class="g-table">
+          <tr><th></th><th>followed by</th><th>example</th></tr>
+          <tr><td><b>c'est</b></td><td><b>with</b> an article — un, une, des, le, la, les, l'</td><td>C'est <b>un</b> professeur. <span class="gloss-i">(He's a teacher.)</span></td></tr>
+          <tr><td><b>il / elle est</b></td><td><b>no</b> article — bare word</td><td>Il est professeur. <span class="gloss-i">(He's a teacher.)</span></td></tr>
+        </table>
+        <p>Same meaning, two shapes. The mistake to avoid is mixing them: <span class="ex">✗ Il est un professeur</span> and <span class="ex">✗ C'est professeur</span> are both wrong.</p>
+        <p><b>Identifying a person</b> — use <b>c'est</b>, like pointing at someone (= voici):</p>
+        <p class="ex">C'est Jérémy.</p> <span class="gloss-i">(This is Jérémy.)</span>
+        <p class="ex">C'est ma sœur.</p> <span class="gloss-i">(This is my sister.)</span>
+        <p><b>Nationality & profession</b> — either shape works:</p>
+        <p class="ex">Elle est canadienne. / C'est une Canadienne.</p> <span class="gloss-i">(She's Canadian.)</span>
+        <p class="ex">Je suis étudiante. / C'est une étudiante.</p> <span class="gloss-i">(I'm a student. / She's a student.)</span>
+        <p><b>In the plural</b>, c'est becomes <b>ce sont</b>:</p>
+        <p class="ex">Ce sont des professeurs.</p> <span class="gloss-i">(They're teachers.)</span>
+        <p class="ex">Ils sont professeurs.</p> <span class="gloss-i">(They're teachers.)</span>
+        <p class="tip">💡 Quick test: if an article (un / une / le / la…) is about to come out of your mouth, start with <b>c'est</b>. If not, use <b>il / elle est</b>.</p>`
+    },
+    {
+      id: "quel-quelle",
+      title: "quel, quelle, quels, quelles — “which / what”",
+      summary: "It agrees with the noun it asks about — and all four sound identical.",
+      body: `
+        <p><b>Quel</b> is an adjective, so it changes shape to match the noun you're asking about:</p>
+        <table class="g-table">
+          <tr><th>form</th><th>use with</th><th>example</th></tr>
+          <tr><td><b>quel</b></td><td>masculine singular</td><td>Quel est ton numéro de téléphone ? <span class="gloss-i">(What's your phone number?)</span></td></tr>
+          <tr><td><b>quelle</b></td><td>feminine singular</td><td>Quelle est ta nationalité ? <span class="gloss-i">(What's your nationality?)</span></td></tr>
+          <tr><td><b>quels</b></td><td>masculine plural</td><td>Quels sont tes films préférés ? <span class="gloss-i">(What are your favourite films?)</span></td></tr>
+          <tr><td><b>quelles</b></td><td>feminine plural</td><td>Quelles sont tes coordonnées ? <span class="gloss-i">(What are your contact details?)</span></td></tr>
+        </table>
+        <p>Note the verb follows too: <b>est</b> for one thing, <b>sont</b> for several.</p>
+        <p>Everyday uses worth memorising whole:</p>
+        <p class="ex">Quel âge as-tu ?</p> <span class="gloss-i">(How old are you? — âge is masculine)</span>
+        <p class="ex">Quelle heure est-il ?</p> <span class="gloss-i">(What time is it? — heure is feminine)</span>
+        <p class="ex">Quel est ton prénom ?</p> <span class="gloss-i">(What's your first name?)</span>
+        <p class="tip">💡 Good news for speaking: all four are pronounced exactly the same — “kel”. The agreement only matters when you write it.</p>`
+    },
+    {
+      id: "je-suis-jai",
+      title: "Three ways to say “I am”",
+      summary: "je suis, j'ai and je m'appelle — French splits what English lumps together.",
+      body: `
+        <p>English uses “I am” for all of these. French picks a different verb for each:</p>
+        <table class="g-table">
+          <tr><th>French</th><th>used for</th><th>example</th></tr>
+          <tr><td><b>je suis</b> + …</td><td>nationality, profession, description</td><td>Je suis malaisienne. <span class="gloss-i">(I am Malaysian.)</span></td></tr>
+          <tr><td><b>j'ai</b> + … ans</td><td>age — literally “I have X years”</td><td>J'ai trente ans. <span class="gloss-i">(I am thirty.)</span></td></tr>
+          <tr><td><b>je m'appelle</b> + …</td><td>your name — literally “I call myself”</td><td>Je m'appelle Sarah. <span class="gloss-i">(My name is Sarah.)</span></td></tr>
+        </table>
+        <p class="tip">⚠︎ The classic beginner slip: <span class="ex">✗ Je suis trente ans</span>. Age always uses <b>avoir</b> → <span class="ex">✓ J'ai trente ans</span>. And don't drop “ans”: <span class="ex">✗ J'ai trente</span> means nothing on its own.</p>
+        <p>Put together, a full introduction:</p>
+        <p class="ex">Bonjour ! Je m'appelle Sarah, j'ai trente ans et je suis malaisienne. Je suis étudiante.</p>
+        <span class="gloss-i">(Hello! My name is Sarah, I'm thirty, and I'm Malaysian. I'm a student.)</span>`
     },
     {
       id: "er-verbs",
@@ -469,6 +589,21 @@ const DATA = {
       ]
     },
     {
+      id: "coordonnees",
+      name: "Asking for details",
+      items: [
+        { fr: "Quel est ton prénom ?", en: "What's your first name?" },
+        { fr: "Quelle est ta nationalité ?", en: "What's your nationality?" },
+        { fr: "Quel âge as-tu ?", en: "How old are you?" },
+        { fr: "Qu'est-ce que tu fais comme travail ?", en: "What do you do for work?" },
+        { fr: "Quel est ton numéro de téléphone ?", en: "What's your phone number?" },
+        { fr: "Quelle est ton adresse e-mail ?", en: "What's your email address?" },
+        { fr: "Quelles sont tes coordonnées ?", en: "What are your contact details?" },
+        { fr: "Comment ça s'écrit ?", en: "How do you spell that?" },
+        { fr: "Vous pouvez répéter, s'il vous plaît ?", en: "Could you repeat that, please?" }
+      ]
+    },
+    {
       id: "cafe",
       name: "At the café / restaurant",
       icon: "☕",
@@ -575,10 +710,10 @@ const DATA = {
     {
       id: "u2",
       title: "Who You Are",
-      goal: "Introduce yourself and use être & avoir.",
-      decks: ["family"],
-      grammar: ["gender-articles", "le-la-les", "etre-avoir"],
-      phrases: ["introductions"],
+      goal: "Introduce yourself: name, age, nationality, job.",
+      decks: ["family", "nationalities", "professions"],
+      grammar: ["gender-articles", "le-la-les", "etre-avoir", "je-suis-jai", "cest-vs-il-est", "quel-quelle"],
+      phrases: ["introductions", "coordonnees"],
       verbs: ["être", "avoir"],
       dialogue: "faire-connaissance"
     },

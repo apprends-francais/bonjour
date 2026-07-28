@@ -73,8 +73,8 @@
     "<path d='M45 146.5 H75 M53 140 V159 M61 140 V159 M69 140 V159' opacity='.6'/>" +
     "</svg>";
   // map content (decks / phrase sets / dialogues) to icons
-  const DECK_ICON = { greetings: "smile", numbers: "hash", family: "users", colors: "palette", food: "coffee", time: "calendar", travel: "compass", home: "home", questions: "help", adjectives: "sparkles", class: "cap" };
-  const PHRASE_ICON = { essentials: "lifebuoy", introductions: "users", cafe: "coffee", shopping: "bag", directions: "compass" };
+  const DECK_ICON = { greetings: "smile", numbers: "hash", family: "users", colors: "palette", food: "coffee", time: "calendar", travel: "compass", home: "home", questions: "help", adjectives: "sparkles", nationalities: "flag", professions: "bag", class: "cap" };
+  const PHRASE_ICON = { essentials: "lifebuoy", introductions: "users", cafe: "coffee", shopping: "bag", directions: "compass", coordonnees: "note" };
   const DIALOGUE_ICON = { "au-cafe": "coffee", "faire-connaissance": "users", "demander-chemin": "compass" };
   const deckIcon = id => ic(DECK_ICON[id] || "layers");
   const phraseIcon = id => ic(PHRASE_ICON[id] || "message");
@@ -771,7 +771,7 @@
      message to the clipboard to send to whoever shared Bonjour.
      ---------------------------------------------------------------------- */
   const REPORT_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — empty = clipboard mode
-  const APP_VERSION = "v23";
+  const APP_VERSION = "v24";
 
   function openReport() {
     if (document.querySelector(".modal-back")) return;
