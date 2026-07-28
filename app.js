@@ -764,6 +764,77 @@
     if (state.settings.voice) speak("Bonjour");
   });
 
+  /* ----------------------------------------------------------------------
+     REPORT A PROBLEM — captures the note + diagnostics.
+     If REPORT_ENDPOINT is set (a form service like Formspree), it POSTs and
+     the report lands in an inbox automatically. Otherwise it copies a ready
+     message to the clipboard to send to whoever shared Bonjour.
+     ---------------------------------------------------------------------- */
+  const REPORT_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — empty = clipboard mode
+  const APP_VERSION = "v23";
+
+  function openReport() {
+    if (document.querySelector(".modal-back")) return;
+    const back = document.createElement("div");
+    back.className = "modal-back";
+    back.innerHTML = `
+      <div class="modal" role="dialog" aria-label="Report a problem">
+        <div style="font-family:var(--fancy);font-size:23px;color:var(--brand-ink)">Report a problem</div>
+        <p class="muted" style="font-size:13.5px;margin:6px 0 12px">Tell us what went wrong — a line or two is plenty. We'll fix it.</p>
+        <textarea class="notes-area" id="repText" style="min-height:110px" placeholder="e.g. the audio didn't play on the numbers quiz, or a word was spelled wrong"></textarea>
+        <input class="v-in" id="repWho" placeholder="Your name (optional)" style="width:100%;margin-top:10px" autocomplete="name">
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn btn-primary" data-send>${ic("flag")} Send report</button>
+          <button class="btn btn-ghost" data-close>Cancel</button>
+        </div>
+        <div class="feedback" id="repFb" style="margin-top:10px;text-align:left;font-weight:500"></div>
+      </div>`;
+    document.body.appendChild(back);
+    const close = () => back.remove();
+    back.addEventListener("click", e => { if (e.target === back) close(); });
+    back.querySelector("[data-close]").addEventListener("click", close);
+    const ta = back.querySelector("#repText"); ta.focus();
+
+    back.querySelector("[data-send]").addEventListener("click", () => {
+      const msg = ta.value.trim();
+      if (!msg) { ta.focus(); return; }
+      const who = back.querySelector("#repWho").value.trim();
+      const ctx = `— details —\npage: ${current}\napp: Bonjour ${APP_VERSION}\nwhen: ${new Date().toISOString()}\nscreen: ${innerWidth}×${innerHeight}\nbrowser: ${navigator.userAgent}`;
+      const full = `Bonjour — problem report\n${who ? "from: " + who + "\n" : ""}\n${msg}\n\n${ctx}`;
+      const fb = back.querySelector("#repFb");
+      if (REPORT_ENDPOINT) {
+        // auto-delivery: lands in an inbox, reporter does nothing else
+        fb.innerHTML = `<span class="muted">Sending…</span>`;
+        fetch(REPORT_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify({ message: msg, from: who, context: ctx }) })
+          .then(r => { if (!r.ok) throw 0; fb.innerHTML = `<span class="ok">✓ Sent — merci ! We'll take a look.</span>`; setTimeout(close, 1500); })
+          .catch(() => shareOrCopy(full, fb, close));
+      } else {
+        // no inbox configured: open the phone's share sheet (WhatsApp / Messages /
+        // Mail…) with the report pre-filled, so it's one real tap to send us.
+        shareOrCopy(full, fb, close);
+      }
+    });
+  }
+  function shareOrCopy(text, fb, close) {
+    if (navigator.share) {
+      navigator.share({ title: "Bonjour — problem report", text: text })
+        .then(() => { fb.innerHTML = `<span class="ok">✓ Merci ! Sent.</span>`; setTimeout(close, 1200); })
+        .catch(() => { copyReport(text, fb); }); // share cancelled → offer copy
+      return;
+    }
+    copyReport(text, fb);
+  }
+  function copyReport(text, fb) {
+    const done = ok => {
+      fb.innerHTML = ok
+        ? `<span class="ok">✓ Report copied — paste it into a message to whoever shared Bonjour with you, and we'll fix it. Merci !</span>`
+        : `<span class="no">Select this and send it to whoever shared Bonjour with you:</span><textarea class="notes-area" style="margin-top:8px" readonly>${esc(text)}</textarea>`;
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => done(true)).catch(() => done(false));
+    } else done(false);
+  }
+
   /* ======================================================================
      VIEWS
      ====================================================================== */
@@ -2453,6 +2524,8 @@
      ---------------------------------------------------------------------- */
   // inject static chrome icons (nav, topbar chips, streak)
   document.querySelectorAll("[data-ico]").forEach(e => { e.innerHTML = ic(e.getAttribute("data-ico")); });
+  var reportBtn = document.getElementById("reportBtn");
+  if (reportBtn) reportBtn.addEventListener("click", openReport);
   ensureClasses();
   if (!state.scores) state.scores = {};
   if (!state.asked) state.asked = {};
