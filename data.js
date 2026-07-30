@@ -404,6 +404,40 @@ const DATA = {
         <p class="tip">💡 French uses <b>avoir</b> for age: “J'ai vingt ans” = literally “I have twenty years”.</p>`
     },
     {
+      id: "possessifs",
+      title: "mon, ma, mes — possessive adjectives",
+      summary: "The one rule that trips up English speakers: they agree with the thing, not the owner.",
+      body: `
+        <p>French has three ways to put a word in front of a noun, and all three shift with the noun's gender:</p>
+        <table class="g-table">
+          <tr><th></th><th>masculine — professeur</th><th>feminine — voiture</th></tr>
+          <tr><td>a / an</td><td><b>un</b> professeur</td><td><b>une</b> voiture</td></tr>
+          <tr><td>the</td><td><b>le</b> professeur</td><td><b>la</b> voiture</td></tr>
+          <tr><td>my</td><td><b>mon</b> professeur</td><td><b>ma</b> voiture</td></tr>
+        </table>
+        <p class="gloss">professeur = teacher · voiture = car</p>
+        <p class="tip">⚑ The golden rule: a French possessive agrees with the <b>thing being owned</b>, never with the owner. Ask yourself “what's the gender of the object?” — the owner is irrelevant.</p>
+        <p>The full set — pick the column by the noun that follows:</p>
+        <table class="g-table">
+          <tr><th>owner</th><th>+ masculine</th><th>+ feminine</th><th>+ plural</th></tr>
+          <tr><td>je <span class="gloss-i">(my)</span></td><td><b>mon</b></td><td><b>ma</b></td><td><b>mes</b></td></tr>
+          <tr><td>tu <span class="gloss-i">(your)</span></td><td><b>ton</b></td><td><b>ta</b></td><td><b>tes</b></td></tr>
+          <tr><td>il / elle <span class="gloss-i">(his / her)</span></td><td><b>son</b></td><td><b>sa</b></td><td><b>ses</b></td></tr>
+          <tr><td>nous <span class="gloss-i">(our)</span></td><td><b>notre</b></td><td><b>notre</b></td><td><b>nos</b></td></tr>
+          <tr><td>vous <span class="gloss-i">(your)</span></td><td><b>votre</b></td><td><b>votre</b></td><td><b>vos</b></td></tr>
+          <tr><td>ils / elles <span class="gloss-i">(their)</span></td><td><b>leur</b></td><td><b>leur</b></td><td><b>leurs</b></td></tr>
+        </table>
+        <p>Notice <b>notre</b>, <b>votre</b> and <b>leur</b> don't care about gender at all — they only change for plural (nos, vos, leurs). Half the work.</p>
+        <p><b>The big consequence:</b> son and sa do <i>not</i> tell you if the owner is male or female:</p>
+        <p class="ex">sa voiture</p> <span class="gloss-i">(his car OR her car — voiture is feminine, so it's always sa)</span>
+        <p class="ex">son professeur</p> <span class="gloss-i">(his teacher OR her teacher — professeur is masculine, so it's always son)</span>
+        <p>Only context tells you whose it is. This is the opposite of English, where “his/her” reveals the owner.</p>
+        <p><b>One exception worth memorising:</b> before a vowel sound, <b>ma / ta / sa</b> become <b>mon / ton / son</b> — even for feminine nouns, because French avoids two vowels colliding:</p>
+        <p class="ex">mon amie</p> <span class="gloss-i">(my friend — amie is feminine, but “ma amie” is unsayable)</span>
+        <p class="ex">son école</p> <span class="gloss-i">(his / her school)</span>
+        <p class="tip">💡 Drill it: Practice → Possessifs generates endless prompts and checks every answer against the rule.</p>`
+    },
+    {
       id: "cest-vs-il-est",
       title: "c'est vs il / elle est — the article rule",
       summary: "The one decides whether you need un/une/le/la, the other forbids it.",
@@ -712,7 +746,7 @@ const DATA = {
       title: "Who You Are",
       goal: "Introduce yourself: name, age, nationality, job.",
       decks: ["family", "nationalities", "professions"],
-      grammar: ["gender-articles", "le-la-les", "etre-avoir", "je-suis-jai", "cest-vs-il-est", "quel-quelle"],
+      grammar: ["gender-articles", "le-la-les", "etre-avoir", "je-suis-jai", "cest-vs-il-est", "quel-quelle", "possessifs"],
       phrases: ["introductions", "coordonnees"],
       verbs: ["être", "avoir"],
       dialogue: "faire-connaissance"

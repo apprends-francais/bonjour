@@ -771,7 +771,7 @@
      message to the clipboard to send to whoever shared Bonjour.
      ---------------------------------------------------------------------- */
   const REPORT_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — empty = clipboard mode
-  const APP_VERSION = "v24";
+  const APP_VERSION = "v25";
 
   function openReport() {
     if (document.querySelector(".modal-back")) return;
@@ -1470,6 +1470,7 @@
         ${modeTile("pencil", "chip-green", "Multiple choice", "Quick quiz, French to English and back.", "quiz")}
         ${modeTile("repeat", "chip-gold", "Conjugation", "Any verb, present tense — type all six forms.", "conj")}
         ${modeTile("grid", "chip-pink", "Match-up", "Match French words to English. Beat the clock.", "match")}
+        ${modeTile("users", "chip-pink", "Possessifs", "mon, ma, mes… match the possessive to the noun.", "poss")}
         ${modeTile("bolt", "chip-orange", "Tricky words", "Extra rounds on the words you keep missing.", "hard")}
       </div>`;
     view.querySelectorAll("[data-mode]").forEach(t => t.addEventListener("click", () => practicePick(t.dataset.mode)));
@@ -1492,6 +1493,18 @@
       return startFlashcards(shuffle(hard), { exit: () => go("practice"), onComplete: done });
     }
     if (mode === "numbers") return renderNumbersPicker();
+    if (mode === "poss") {
+      const SETS = [
+        { id: "je-tu", keys: ["je", "tu"], name: "mon / ma · ton / ta", note: "start here — my and your" },
+        { id: "il", keys: ["il"], name: "son / sa / ses", note: "his or her — the tricky one" },
+        { id: "nvl", keys: ["nous", "vous", "ils"], name: "notre · votre · leur", note: "our, your, their — no gender to worry about" },
+        { id: "all", keys: ["je", "tu", "il", "nous", "vous", "ils"], name: "All mixed", note: "everything at once" }
+      ];
+      return pickList("Choose the owners", SETS.map(s => ({ id: s.id, name: s.name, sub: s.note + scoreSuffix("poss:" + s.id), icon: ic("users"), chip: "chip-pink" })), id => {
+        const s = SETS.find(x => x.id === id);
+        startPossessives(s.keys, { scoreKey: "poss:" + id, exit: () => practicePick("poss"), onComplete: done });
+      }, "practice");
+    }
     // deck-based modes
     pickList("Choose a topic", DATA.decks.map(d => ({ id: d.id, name: d.name, sub: d.cards.length + " words" + (mode === "flash" ? "" : scoreSuffix(mode + ":" + d.id)), icon: deckIcon(d.id), chip: "chip-brand" })), id => {
       const cards = DATA.deckById[id].cards;
@@ -2124,6 +2137,112 @@
     render();
   }
 
+  /* ----------------------------------------------------------------------
+     POSSESSIVES — rule-generated, so every answer is correct by construction.
+     Agrees with the THING possessed, not the owner. ma/ta/sa → mon/ton/son
+     before a vowel sound.
+     ---------------------------------------------------------------------- */
+  const POSS_OWNERS = [
+    { key: "je",        label: "je",          en: "my",          m: "mon",   f: "ma",    pl: "mes"   },
+    { key: "tu",        label: "tu",          en: "your",        m: "ton",   f: "ta",    pl: "tes"   },
+    { key: "il",        label: "il / elle",   en: "his / her",   m: "son",   f: "sa",    pl: "ses"   },
+    { key: "nous",      label: "nous",        en: "our",         m: "notre", f: "notre", pl: "nos"   },
+    { key: "vous",      label: "vous",        en: "your",        m: "votre", f: "votre", pl: "vos"   },
+    { key: "ils",       label: "ils / elles", en: "their",       m: "leur",  f: "leur",  pl: "leurs" }
+  ];
+  function startsVowelSound(word) {
+    return /^[aeiouâàáéèêëîïíôöóûüúœæ]/i.test(String(word).trim());
+  }
+  // the correct possessive for this owner + noun, plus why
+  function possessiveFor(owner, card) {
+    const head = splitArticle(card.fr).head;
+    const g = card.g === "pl" ? "pl" : (card.g === "f" ? "f" : "m");
+    let word = owner[g];
+    let note = "";
+    if (g === "f" && startsVowelSound(head) && (owner.key === "je" || owner.key === "tu" || owner.key === "il")) {
+      word = owner.m; // ma amie → mon amie
+      note = "feminine, but starts with a vowel → " + owner.m + ", not " + owner.f;
+    } else if (g === "pl") {
+      note = "plural noun → " + word;
+    } else {
+      note = (g === "f" ? "feminine" : "masculine") + " noun → " + word;
+    }
+    return { word, note, gender: g, head };
+  }
+  function startPossessives(ownerKeys, opts) {
+    opts = opts || {};
+    const exit = opts.exit || (() => go("practice"));
+    const owners = POSS_OWNERS.filter(o => ownerKeys.includes(o.key));
+    const nouns = DATA.cardIndex.filter(c => c.deckId !== "class" && c.pos === "noun" && ["m", "f", "pl"].includes(c.g));
+    const ROUNDS = 12;
+    let i = 0, right = 0;
+    const mistakes = [];
+    const used = new Set();
+
+    function pick() {
+      const pool = nouns.filter(c => !used.has(c.cid));
+      const card = (pool.length ? pool : nouns)[Math.floor(Math.random() * (pool.length ? pool.length : nouns.length))];
+      used.add(card.cid);
+      return { card, owner: owners[Math.floor(Math.random() * owners.length)] };
+    }
+    function render() {
+      if (i >= ROUNDS) {
+        recordScore(opts.scoreKey, right, ROUNDS);
+        return finishReport({
+          title: "Possessifs", right, total: ROUNDS, mistakes,
+          onRetry: () => startPossessives(ownerKeys, opts),
+          onDone: () => opts.onComplete && opts.onComplete()
+        });
+      }
+      const { card, owner } = pick();
+      const sol = possessiveFor(owner, card);
+      // plausible wrong answers: this owner's other forms first, then other owners' same-slot forms
+      const wrong = new Set();
+      [owner.m, owner.f, owner.pl].forEach(w => { if (w !== sol.word) wrong.add(w); });
+      shuffle(POSS_OWNERS).forEach(o => { if (wrong.size < 3) { const w = o[sol.gender]; if (w !== sol.word) wrong.add(w); } });
+      const options = shuffle([sol.word, ...[...wrong].slice(0, 3)]);
+
+      view.innerHTML = `
+        <div class="quiz-wrap">
+          <div class="study-top">
+            <button class="btn btn-ghost" data-quit>${ic("back")} Exit</button>
+            <div class="study-progress"><div class="bar"><span style="width:${Math.round(i / ROUNDS * 100)}%"></span></div></div>
+            <div class="muted" style="font-size:13px">${i + 1}/${ROUNDS}</div>
+          </div>
+          <div class="q-prompt">
+            <div class="muted" style="font-size:13.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">${esc(owner.label)} — ${esc(owner.en)}</div>
+            <div class="q-word" style="margin-top:6px">___ ${esc(sol.head)}</div>
+            <div class="q-sub">${esc(card.fr)} <span class="gloss-i">(${esc(card.en)})</span></div>
+          </div>
+          <div class="options">
+            ${options.map(o => `<button class="option" data-w="${esc(o)}" style="text-align:center;font-family:var(--display);font-size:19px">${esc(o)} ${esc(sol.head)}</button>`).join("")}
+          </div>
+          <div class="feedback" id="fb"></div>
+        </div>`;
+      $("[data-quit]").addEventListener("click", exit);
+      let answered = false;
+      view.querySelectorAll(".option").forEach(b => b.addEventListener("click", () => {
+        if (answered) return; // one answer per round
+        answered = true;
+        const chosen = b.dataset.w === sol.word;
+        view.querySelectorAll(".option").forEach(o => {
+          o.classList.add("disabled");
+          if (o.dataset.w === sol.word) o.classList.add("correct");
+          else if (o === b) o.classList.add("wrong");
+        });
+        const full = sol.word + " " + sol.head;
+        speak(full);
+        if (chosen) { right++; awardXP(3); $("#fb").innerHTML = `<span class="ok">✓ ${esc(full)} — ${esc(sol.note)}</span>`; }
+        else {
+          mistakes.push({ main: full, sub: `you chose “${b.dataset.w}” · ${sol.note}`, say: full });
+          $("#fb").innerHTML = `<span class="no">→ ${esc(full)} — ${esc(sol.note)}</span>`;
+        }
+        setTimeout(() => { i++; render(); }, chosen ? 1100 : 2100);
+      }));
+    }
+    render();
+  }
+
   /* ----- NUMBERS TRAINER: hear a number, type the digits ----- */
   function startNumbers(range, opts) {
     opts = opts || {};
@@ -2536,7 +2655,7 @@
   // in storage untouched; call syncClassDeck() here again to bring it all back.
   buildLex();
   buildFullDict();
-  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse }; // console access for checking generated answers
+  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS }; // console access for checking generated answers
   refreshChrome();
   go("home");
 
