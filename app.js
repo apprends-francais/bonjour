@@ -307,46 +307,55 @@
   }
 
   /* ----------------------------------------------------------------------
-     CONJUGATION ENGINE — present tense for (nearly) any verb
+     CONJUGATION — verified tables from Lexique 3.83 (dict.js), with a
+     rule engine only as a fallback for regular -er verbs. Never invents
+     forms for -ir / -re / irregular verbs; those must come from the table.
      ---------------------------------------------------------------------- */
+  const VERBS = new Map(); // inf -> { forms:[6], pp }
+  function buildVerbTables() {
+    if (!window.VERBS_RAW) return;
+    window.VERBS_RAW.split("\n").forEach(l => {
+      const t = l.split("\t");
+      if (t.length < 8 || !t[0]) return;
+      VERBS.set(t[0], { forms: t.slice(1, 7), pp: t[7] || "" });
+    });
+  }
+  function groupLabel(inf, forms) {
+    if (inf.endsWith("er")) return "-er";
+    if (inf.endsWith("ir")) return /issons$/.test(forms[3]) ? "-ir (régulier)" : "-ir (irrégulier)";
+    if (inf.endsWith("re")) return "-re";
+    return "irrégulier";
+  }
   function conjPresent(infRaw) {
     const inf = String(infRaw).toLowerCase().replace(/[’]/g, "'").trim();
     const K = DATA.verbByInf[inf];
-    if (K) return { inf, en: K.en, group: K.group, forms: K.forms.slice(), elide: K.elide };
+    if (K) return { inf, en: K.en, group: K.group, forms: K.forms.slice(), elide: K.elide, verified: true };
+    const T = VERBS.get(inf);
+    if (T) return { inf, group: groupLabel(inf, T.forms), forms: T.forms.slice(),
+                    elide: /^[aeiouâàéèêëîïôûùœ]/i.test(T.forms[0]), verified: true };
     const mk = (forms, group) => ({ inf, group, forms, elide: /^[aeiouâàéèêëîïôûùœh]/i.test(forms[0]) });
-    if (inf.endsWith("prendre")) {
-      const b = inf.slice(0, -7);
-      return mk([b + "prends", b + "prends", b + "prend", b + "prenons", b + "prenez", b + "prennent"], "irregular");
-    }
-    if (inf.endsWith("venir") || inf.endsWith("tenir")) {
-      const b = inf.slice(0, -5), r = inf.endsWith("venir") ? "v" : "t";
-      return mk([b + r + "iens", b + r + "iens", b + r + "ient", b + r + "enons", b + r + "enez", b + r + "iennent"], "irregular");
-    }
-    if (/(vrir|frir)$/.test(inf)) { // ouvrir, offrir, découvrir — conjugate like -er
-      const st = inf.slice(0, -2);
-      return mk([st + "e", st + "es", st + "e", st + "ons", st + "ez", st + "ent"], "-ir (comme -er)");
-    }
-    if (/(mir|tir|vir)$/.test(inf) && inf.length > 5) { // dormir, partir, sortir, servir
-      const short = inf.slice(0, -3), full = inf.slice(0, -2);
-      return mk([short + "s", short + "s", short + "t", full + "ons", full + "ez", full + "ent"], "irregular");
-    }
     if (inf.endsWith("er") && inf.length > 3) {
       const stem = inf.slice(0, -2);
-      const nous = stem + (stem.endsWith("g") ? "eons" : stem.endsWith("c") ? "çons" : "ons");
+      // manger → mangeons (keep the g, add e); commencer → commençons (c becomes ç)
+      const nous = stem.endsWith("g") ? stem + "eons"
+                 : stem.endsWith("c") ? stem.slice(0, -1) + "çons"
+                 : stem + "ons";
+      // -eler / -eter split (appeler→appelle vs geler→gèle) is lexical, not
+      // derivable. The common ones are all in the verified table above, so if
+      // we got here we refuse instead of guessing wrong.
+      if (/(el|et)$/.test(stem)) return null;
       let strong = stem; // stem used in je/tu/il/ils
-      if (/(el|et)$/.test(stem) && /^(appel|rappel|jet|projet|rejet)/.test(stem)) strong = stem + stem.slice(-1); // appelle, jette
-      else if (/[eé][bcçdfglmnprstvz]$/.test(stem)) strong = stem.replace(/[eé](?=[bcçdfglmnprstvz]$)/, "è"); // achète, préfère, lève
-      else if (/y$/.test(stem) && /[aou]y$/.test(stem)) strong = stem.replace(/y$/, "i"); // paie, essaie, nettoie
+      // é + consonants before the mute e always opens to è: préfère, célèbre, allègue
+      if (/é(?:gu|qu|ch|gn|ph|th|[bcdfgpt][lr]|vr|[bcçdfgjklmnpqrstvz])$/.test(stem)) strong = stem.replace(/é(?=(?:gu|qu|ch|gn|ph|th|[bcdfgpt][lr]|vr|[bcçdfgjklmnpqrstvz])$)/, "è");
+      // plain e opens only before a SINGLE consonant (not x), and not after another vowel:
+      // achète, lève, pèse — but réserve, annexe, briefe stay put
+      else if (/[^aeiouyéèêëîïôûù]e(?:gu|qu|ch|gn|ph|th|[bcdfgpt][lr]|vr|[bcçdfgjklmnpqrstvz])$/.test(stem)) strong = stem.replace(/e(?=(?:gu|qu|ch|gn|ph|th|[bcdfgpt][lr]|vr|[bcçdfgjklmnpqrstvz])$)/, "è");
+      else if (/[aou]y$/.test(stem)) strong = stem.replace(/y$/, "i"); // paie, essaie, nettoie
       return mk([strong + "e", strong + "es", strong + "e", nous, stem + "ez", strong + "ent"], "-er");
     }
-    if (inf.endsWith("ir") && inf.length > 3) { // finir type
-      const st = inf.slice(0, -2);
-      return mk([st + "is", st + "is", st + "it", st + "issons", st + "issez", st + "issent"], "-ir");
-    }
-    if (inf.endsWith("re") && inf.length > 3) { // attendre type
-      const st = inf.slice(0, -2);
-      return mk([st + "s", st + "s", st.endsWith("d") ? st : st + "t", st + "ons", st + "ez", st + "ent"], "-re");
-    }
+    // -ir and -re are mostly irregular in French; guessing them taught wrong
+    // forms (verified: only 36% of -re verbs matched Lexique). If the verified
+    // table above doesn't have it, we refuse rather than invent a conjugation.
     return null;
   }
   /* passé composé: aux + past participle */
@@ -361,11 +370,12 @@
   const ETRE_VERBS = new Set(["aller", "venir", "devenir", "revenir", "arriver", "partir", "rester", "sortir", "entrer", "rentrer", "monter", "descendre", "retourner", "tomber", "passer", "naître", "mourir"]);
   function conjPasse(infRaw) {
     const inf = String(infRaw).toLowerCase().replace(/[’]/g, "'").trim();
-    let pp = PP_IRREG[inf];
+    // verified participle from Lexique first, then the curated list, then
+    // the regular -er rule. Never guess an -ir / -re participle.
+    const T = VERBS.get(inf);
+    let pp = (T && T.pp) || PP_IRREG[inf];
     if (!pp) {
       if (inf.endsWith("er")) pp = inf.slice(0, -2) + "é";
-      else if (inf.endsWith("ir")) pp = inf.slice(0, -2) + "i";
-      else if (inf.endsWith("re")) pp = inf.slice(0, -2) + "u";
       else return null;
     }
     const etre = ETRE_VERBS.has(inf);
@@ -429,6 +439,7 @@
   // is this plausibly a verb? (known table, dictionary says verb, or classic infinitive shape)
   function isVerbish(inf) {
     if (DATA.verbByInf[inf]) return true;
+    if (VERBS.has(inf)) return true;
     const found = lexFind(inf);
     if (found && found.exact && found.entry.pos === "verb") return true;
     return false;
@@ -771,7 +782,7 @@
      message to the clipboard to send to whoever shared Bonjour.
      ---------------------------------------------------------------------- */
   const REPORT_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — empty = clipboard mode
-  const APP_VERSION = "v25";
+  const APP_VERSION = "v26";
 
   function openReport() {
     if (document.querySelector(".modal-back")) return;
@@ -1593,8 +1604,13 @@
     const goVerb = () => {
       const inf = $("#anyVerb").value.toLowerCase().replace(/[’]/g, "'").trim();
       if (!inf) return;
-      if (!conjPresent(inf) || !(isVerbish(inf) || DATA.verbByInf[inf])) {
-        toast("Hmm — I don't recognize that as a French verb. Check the spelling?");
+      const built = conjPresent(inf);
+      if (!built) {
+        // distinguish "not a verb" from "a real verb we can't conjugate safely"
+        const known = isVerbish(inf) || /(er|ir|re|oir)$/.test(inf);
+        toast(known
+          ? "That verb is irregular and I don't have a verified table for it — I'd rather not guess. Try a more common verb."
+          : "Hmm — I don't recognize that as a French verb. Check the spelling?");
         return;
       }
       startConjugation([inf], conjOpts(inf));
@@ -1947,6 +1963,13 @@
         const bases = v.agree
           ? ["", "e", "s", "es"].map(sfx => v.aux[k] + " " + v.pp + sfx) // être-verbs: any agreement accepted
           : [v.forms[k]];
+        // -ayer verbs allow both spellings: je paie / je paye
+        if (/ayer$/.test(v.inf)) {
+          const alt = v.forms[k].replace(/ai(e|es|ent)$/, "ay$1");
+          if (alt !== v.forms[k]) bases.push(alt);
+          const alt2 = v.forms[k].replace(/ay(e|es|ent)$/, "ai$1");
+          if (alt2 !== v.forms[k]) bases.push(alt2);
+        }
         const out = [];
         bases.forEach(f => out.push(normalize(f), normalize(pro + " " + f), normalize((v.elide && k === 0 ? "j " : pro + " ") + f)));
         return out;
@@ -2655,7 +2678,8 @@
   // in storage untouched; call syncClassDeck() here again to bring it all back.
   buildLex();
   buildFullDict();
-  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS }; // console access for checking generated answers
+  buildVerbTables();
+  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS, VERBS }; // console access for checking generated answers
   refreshChrome();
   go("home");
 
