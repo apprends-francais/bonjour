@@ -245,6 +245,69 @@ const DATA = {
       ]
     },
     {
+      id: "places",
+      name: "Countries & Cities",
+      blurb: "Where you're from and where you're going — with the right preposition.",
+      cards: [
+        /* feminine countries — nearly all end in -e */
+        { fr: "la France", en: "France", pos: "noun", g: "f", place: "f", ex: { fr: "J'habite en France.", en: "I live in France." } },
+        { fr: "la Malaisie", en: "Malaysia", pos: "noun", g: "f", place: "f", ex: { fr: "Je viens de Malaisie.", en: "I come from Malaysia." } },
+        { fr: "la Chine", en: "China", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Espagne", en: "Spain", pos: "noun", g: "f", place: "f", ex: { fr: "Nous allons en Espagne.", en: "We're going to Spain." } },
+        { fr: "l'Italie", en: "Italy", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Allemagne", en: "Germany", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Angleterre", en: "England", pos: "noun", g: "f", place: "f" },
+        { fr: "la Belgique", en: "Belgium", pos: "noun", g: "f", place: "f" },
+        { fr: "la Suisse", en: "Switzerland", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Inde", en: "India", pos: "noun", g: "f", place: "f" },
+        { fr: "la Thaïlande", en: "Thailand", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Australie", en: "Australia", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Algérie", en: "Algeria", pos: "noun", g: "f", place: "f" },
+        { fr: "la Turquie", en: "Turkey", pos: "noun", g: "f", place: "f" },
+        { fr: "l'Égypte", en: "Egypt", pos: "noun", g: "f", place: "f" },
+        /* masculine countries */
+        { fr: "le Canada", en: "Canada", pos: "noun", g: "m", place: "m", ex: { fr: "Je vais au Canada.", en: "I'm going to Canada." } },
+        { fr: "le Japon", en: "Japan", pos: "noun", g: "m", place: "m", ex: { fr: "Il vient du Japon.", en: "He comes from Japan." } },
+        { fr: "le Maroc", en: "Morocco", pos: "noun", g: "m", place: "m" },
+        { fr: "le Portugal", en: "Portugal", pos: "noun", g: "m", place: "m" },
+        { fr: "le Brésil", en: "Brazil", pos: "noun", g: "m", place: "m" },
+        { fr: "le Sénégal", en: "Senegal", pos: "noun", g: "m", place: "m" },
+        { fr: "le Vietnam", en: "Vietnam", pos: "noun", g: "m", place: "m" },
+        { fr: "le Danemark", en: "Denmark", pos: "noun", g: "m", place: "m" },
+        { fr: "le Pérou", en: "Peru", pos: "noun", g: "m", place: "m" },
+        { fr: "le Liban", en: "Lebanon", pos: "noun", g: "m", place: "m" },
+        { fr: "le Pakistan", en: "Pakistan", pos: "noun", g: "m", place: "m" },
+        /* masculine but ending in -e — the exceptions to learn by heart */
+        { fr: "le Mexique", en: "Mexico (masculine!)", pos: "noun", g: "m", place: "m", ex: { fr: "Je vais au Mexique.", en: "I'm going to Mexico." } },
+        { fr: "le Cambodge", en: "Cambodia (masculine!)", pos: "noun", g: "m", place: "m" },
+        { fr: "le Zimbabwe", en: "Zimbabwe (masculine!)", pos: "noun", g: "m", place: "m" },
+        /* masculine starting with a vowel — these behave like feminine ones */
+        { fr: "l'Iran", en: "Iran", pos: "noun", g: "m", place: "mv", ex: { fr: "Elle habite en Iran.", en: "She lives in Iran." } },
+        { fr: "l'Irak", en: "Iraq", pos: "noun", g: "m", place: "mv" },
+        { fr: "l'Afghanistan", en: "Afghanistan", pos: "noun", g: "m", place: "mv" },
+        { fr: "l'Équateur", en: "Ecuador", pos: "noun", g: "m", place: "mv" },
+        /* plural countries */
+        { fr: "les États-Unis", en: "the United States", pos: "noun", g: "pl", place: "pl", ex: { fr: "Je viens des États-Unis.", en: "I come from the United States." } },
+        { fr: "les Pays-Bas", en: "the Netherlands", pos: "noun", g: "pl", place: "pl" },
+        { fr: "les Philippines", en: "the Philippines", pos: "noun", g: "pl", place: "pl" },
+        /* cities — no article, always à / de */
+        { fr: "Paris", en: "Paris", pos: "noun", place: "city", ex: { fr: "Je suis à Paris.", en: "I'm in Paris." } },
+        { fr: "Londres", en: "London", pos: "noun", place: "city", ex: { fr: "Il arrive de Londres.", en: "He's arriving from London." } },
+        { fr: "Bruxelles", en: "Brussels", pos: "noun", place: "city" },
+        { fr: "Genève", en: "Geneva", pos: "noun", place: "city" },
+        { fr: "Lisbonne", en: "Lisbon", pos: "noun", place: "city" },
+        { fr: "Moscou", en: "Moscow", pos: "noun", place: "city" },
+        { fr: "Pékin", en: "Beijing", pos: "noun", place: "city" },
+        { fr: "Varsovie", en: "Warsaw", pos: "noun", place: "city" },
+        { fr: "Édimbourg", en: "Edinburgh", pos: "noun", place: "city" },
+        { fr: "Montréal", en: "Montreal", pos: "noun", place: "city" },
+        { fr: "Kuala Lumpur", en: "Kuala Lumpur", pos: "noun", place: "city" },
+        { fr: "Singapour", en: "Singapore", pos: "noun", place: "city" },
+        { fr: "Amsterdam", en: "Amsterdam", pos: "noun", place: "city" },
+        { fr: "Le Caire", en: "Cairo (a city with an article)", pos: "noun", g: "m", place: "m", ex: { fr: "Je vais au Caire.", en: "I'm going to Cairo." } }
+      ]
+    },
+    {
       id: "nationalities",
       name: "Nationalities",
       blurb: "Say where you're from — masculine / feminine forms.",
@@ -402,6 +465,87 @@ const DATA = {
         </div>
         <p class="tip">⚠︎ Three traps to watch in <b>être</b>: it's <b>il est</b> / <b>elle est</b> (never “il son”) · <b>nous sommes</b> with the <b>-s</b> (not “nous somme”) · <b>vous êtes</b> with the accent on the ê. Only <b>ils/elles sont</b> uses “sont”.</p>
         <p class="tip">💡 French uses <b>avoir</b> for age: “J'ai vingt ans” = literally “I have twenty years”.</p>`
+    },
+    {
+      id: "pays-villes",
+      title: "Countries & cities: à, au, aux, en — de, du, des",
+      summary: "Which little word to use for where you're going and where you're from.",
+      body: `
+        <p>French picks the preposition based on <b>what kind of place</b> it is. Two questions to answer:</p>
+        <p><b>1. Where are you going / where do you live?</b> <span class="gloss-i">(à / en / au / aux)</span></p>
+        <table class="g-table">
+          <tr><th>place</th><th>use</th><th>example</th></tr>
+          <tr><td>a city</td><td><b>à</b></td><td>à Paris, à Kuala Lumpur <span class="gloss-i">(in / to Paris)</span></td></tr>
+          <tr><td>a feminine country</td><td><b>en</b></td><td>en France, en Malaisie <span class="gloss-i">(in / to France)</span></td></tr>
+          <tr><td>a masculine country</td><td><b>au</b></td><td>au Canada, au Japon <span class="gloss-i">(in / to Canada)</span></td></tr>
+          <tr><td>a plural country</td><td><b>aux</b></td><td>aux États-Unis <span class="gloss-i">(in / to the US)</span></td></tr>
+          <tr><td>masculine starting with a vowel</td><td><b>en</b></td><td>en Iran, en Irak <span class="gloss-i">(in / to Iran)</span></td></tr>
+        </table>
+        <p><b>2. Where are you from?</b> <span class="gloss-i">(de / du / des)</span></p>
+        <table class="g-table">
+          <tr><th>place</th><th>use</th><th>example</th></tr>
+          <tr><td>a city</td><td><b>de</b></td><td>de Paris, d'Amsterdam <span class="gloss-i">(from Paris)</span></td></tr>
+          <tr><td>a feminine country</td><td><b>de</b></td><td>de France, d'Espagne <span class="gloss-i">(from France)</span></td></tr>
+          <tr><td>a masculine country</td><td><b>du</b></td><td>du Canada, du Japon <span class="gloss-i">(from Canada)</span></td></tr>
+          <tr><td>a plural country</td><td><b>des</b></td><td>des États-Unis <span class="gloss-i">(from the US)</span></td></tr>
+          <tr><td>masculine starting with a vowel</td><td><b>d'</b></td><td>d'Iran, d'Irak <span class="gloss-i">(from Iran)</span></td></tr>
+        </table>
+        <p class="tip">⚑ Where <b>au, aux, du, des</b> come from: they're just the merged forms you already know — à + le = <b>au</b>, à + les = <b>aux</b>, de + le = <b>du</b>, de + les = <b>des</b>. So “au Japon” is really “à le Japon”.</p>
+        <p><b>How do I know if a country is feminine?</b> Almost every country ending in <b>-e</b> is feminine: la France, la Chine, l'Italie, la Belgique, la Malaisie. Everything else is masculine: le Canada, le Japon, le Maroc, le Portugal.</p>
+        <p class="tip">⚠︎ Learn these exceptions — they end in -e but are masculine: <b>le Mexique</b>, <b>le Cambodge</b>, <b>le Zimbabwe</b>, <b>le Mozambique</b>. So it's “au Mexique”, never “en Mexique”.</p>
+        <p>Notice that <b>en</b> swallows the article completely — you say <span class="ex">en France</span>, never “en la France”. But <b>au / du</b> already contain it.</p>
+        <p class="tip">⚑ Careful — not every verb wants a preposition. <b>visiter</b> takes the place directly and <b>keeps the article</b>; <b>aller</b> needs the preposition. Same countries, two different shapes:</p>
+        <table class="g-table">
+          <tr><th>visiter — keep le / la / les</th><th>aller — use en / au / aux / à</th></tr>
+          <tr><td>Je visite <b>la</b> Malaisie</td><td>Je vais <b>en</b> Malaisie</td></tr>
+          <tr><td>Tu visites <b>le</b> Vietnam</td><td>Tu vas <b>au</b> Vietnam</td></tr>
+          <tr><td>On visite <b>les</b> Philippines</td><td>On va <b>aux</b> Philippines</td></tr>
+          <tr><td>Nous visitons <b>l'</b>Allemagne</td><td>Nous allons <b>en</b> Allemagne</td></tr>
+          <tr><td>Ils visitent Singapour</td><td>Ils vont <b>à</b> Singapour</td></tr>
+        </table>
+        <p class="gloss">visiter = to visit · aller = to go. Cities take no article at all with visiter: “je visite Singapour”.</p>
+        <p>Verbs that behave like <b>visiter</b> (no preposition, keep the article): <span class="ex">aimer</span>, <span class="ex">adorer</span>, <span class="ex">détester</span>, <span class="ex">connaître</span> — <i>j'adore l'Italie</i> <span class="gloss-i">(I love Italy)</span>. Verbs that behave like <b>aller</b>: <span class="ex">habiter</span>, <span class="ex">être</span>, <span class="ex">venir</span> <span class="gloss-i">(with de)</span>.</p>
+        <p>All together:</p>
+        <p class="ex">Je viens de Malaisie, j'habite à Kuala Lumpur, et je vais au Japon en septembre.</p>
+        <span class="gloss-i">(I'm from Malaysia, I live in Kuala Lumpur, and I'm going to Japan in September.)</span>
+        <p class="tip">💡 A few cities carry their own article and behave like masculine countries: <b>Le Caire</b> → au Caire, du Caire <span class="gloss-i">(Cairo)</span>. Drill the whole system in Practice → Pays &amp; villes.</p>`
+    },
+    {
+      id: "verbes-lieux",
+      title: "Which verb takes which preposition",
+      summary: "aller, habiter, partir, visiter — why they don't all behave the same.",
+      body: `
+        <p>Once you know <b>à / en / au / aux</b> and <b>de / du / des</b>, the next question is which one a given verb wants. The trick: it isn't really about the verb — it's about <b>what you mean</b>. Three groups:</p>
+        <p><b>1. Where you're going, or where you are</b> → à, en, au, aux</p>
+        <table class="g-table">
+          <tr><td><b>aller</b> <span class="gloss-i">(to go)</span></td><td>Je vais <b>en</b> France. <span class="gloss-i">(I'm going to France.)</span></td></tr>
+          <tr><td><b>habiter</b> <span class="gloss-i">(to live)</span></td><td>J'habite <b>au</b> Japon. <span class="gloss-i">(I live in Japan.)</span></td></tr>
+          <tr><td><b>être</b> <span class="gloss-i">(to be)</span></td><td>Je suis <b>à</b> Paris. <span class="gloss-i">(I'm in Paris.)</span></td></tr>
+          <tr><td><b>travailler</b> <span class="gloss-i">(to work)</span></td><td>Elle travaille <b>aux</b> États-Unis. <span class="gloss-i">(She works in the US.)</span></td></tr>
+        </table>
+        <p><b>2. Where you're from</b> → de, du, des</p>
+        <table class="g-table">
+          <tr><td><b>venir</b> <span class="gloss-i">(to come)</span></td><td>Je viens <b>de</b> Malaisie. <span class="gloss-i">(I come from Malaysia.)</span></td></tr>
+          <tr><td><b>arriver</b> <span class="gloss-i">(to arrive)</span></td><td>Il arrive <b>du</b> Canada. <span class="gloss-i">(He's arriving from Canada.)</span></td></tr>
+          <tr><td><b>rentrer</b> <span class="gloss-i">(to get back)</span></td><td>Nous rentrons <b>des</b> Philippines. <span class="gloss-i">(We're back from the Philippines.)</span></td></tr>
+        </table>
+        <p><b>3. No preposition at all</b> — the place is the direct object, so you keep <b>le / la / les</b></p>
+        <table class="g-table">
+          <tr><td><b>visiter</b> <span class="gloss-i">(to visit)</span></td><td>Je visite <b>la</b> France.</td></tr>
+          <tr><td><b>quitter</b> <span class="gloss-i">(to leave)</span></td><td>Je quitte <b>le</b> Maroc.</td></tr>
+          <tr><td><b>adorer</b> <span class="gloss-i">(to love)</span></td><td>J'adore <b>l'</b>Italie.</td></tr>
+          <tr><td><b>connaître</b> <span class="gloss-i">(to know)</span></td><td>Tu connais <b>les</b> Pays-Bas ?</td></tr>
+        </table>
+        <p class="tip">⚑ <b>partir</b> is the one that confuses everyone, because it can point both ways — and the preposition is what tells you which:</p>
+        <p class="ex">Je pars de Paris.</p> <span class="gloss-i">(I'm leaving FROM Paris.)</span>
+        <p class="ex">Je pars en France. / Je pars pour la France.</p> <span class="gloss-i">(I'm leaving FOR France. Note that “pour” keeps the article.)</span>
+        <p><b>arriver</b> and <b>venir</b> do the same:</p>
+        <p class="ex">J'arrive de Londres.</p> <span class="gloss-i">(I'm arriving from London.)</span>
+        <p class="ex">J'arrive à Londres.</p> <span class="gloss-i">(I'm arriving in London.)</span>
+        <p class="tip">💡 <b>habiter</b> has its own quirk: it works with or without the preposition. Both <span class="ex">j'habite à Paris</span> and <span class="ex">j'habite Paris</span> are correct <span class="gloss-i">(I live in Paris)</span>.</p>
+        <p>The pair worth learning by heart, because they mean nearly the same thing with opposite grammar:</p>
+        <p class="ex">Je quitte la France.</p> <span class="gloss-i">(direct object — no preposition)</span>
+        <p class="ex">Je pars de France.</p> <span class="gloss-i">(preposition — no article)</span>`
     },
     {
       id: "possessifs",
@@ -774,9 +918,9 @@ const DATA = {
     {
       id: "u5",
       title: "Getting Around",
-      goal: "Find your way and ask questions.",
-      decks: ["travel", "questions"],
-      grammar: ["negation", "aller-futur"],
+      goal: "Find your way, ask questions, talk about countries.",
+      decks: ["travel", "questions", "places"],
+      grammar: ["negation", "aller-futur", "pays-villes", "verbes-lieux"],
       phrases: ["directions"],
       verbs: ["aller", "venir", "prendre"],
       dialogue: "demander-chemin"

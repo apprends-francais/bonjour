@@ -782,7 +782,7 @@
      message to the clipboard to send to whoever shared Bonjour.
      ---------------------------------------------------------------------- */
   const REPORT_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx" — empty = clipboard mode
-  const APP_VERSION = "v26";
+  const APP_VERSION = "v28";
 
   function openReport() {
     if (document.querySelector(".modal-back")) return;
@@ -1481,6 +1481,7 @@
         ${modeTile("pencil", "chip-green", "Multiple choice", "Quick quiz, French to English and back.", "quiz")}
         ${modeTile("repeat", "chip-gold", "Conjugation", "Any verb, present tense — type all six forms.", "conj")}
         ${modeTile("grid", "chip-pink", "Match-up", "Match French words to English. Beat the clock.", "match")}
+        ${modeTile("compass", "chip-green", "Pays & villes", "à, au, aux, en · de, du, des — countries and cities.", "places")}
         ${modeTile("users", "chip-pink", "Possessifs", "mon, ma, mes… match the possessive to the noun.", "poss")}
         ${modeTile("bolt", "chip-orange", "Tricky words", "Extra rounds on the words you keep missing.", "hard")}
       </div>`;
@@ -1504,6 +1505,18 @@
       return startFlashcards(shuffle(hard), { exit: () => go("practice"), onComplete: done });
     }
     if (mode === "numbers") return renderNumbersPicker();
+    if (mode === "places") {
+      const SETS = [
+        { id: "to",   dirs: ["to"],       name: "Je vais…", note: "going to — à, en, au, aux" },
+        { id: "from", dirs: ["from"],     name: "Je viens…", note: "coming from — de, du, des" },
+        { id: "visit", dirs: ["visit"], name: "Je visite…", note: "visiter keeps the article — no preposition" },
+        { id: "both", dirs: ["to","from","visit"], name: "All mixed", note: "aller, venir and visiter together" }
+      ];
+      return pickList("Going or coming?", SETS.map(s => ({ id: s.id, name: s.name, sub: s.note + scoreSuffix("places:" + s.id), icon: ic("compass"), chip: "chip-green" })), id => {
+        const s = SETS.find(x => x.id === id);
+        startPlaces(s.dirs, { scoreKey: "places:" + id, exit: () => practicePick("places"), onComplete: done });
+      }, "practice");
+    }
     if (mode === "poss") {
       const SETS = [
         { id: "je-tu", keys: ["je", "tu"], name: "mon / ma · ton / ta", note: "start here — my and your" },
@@ -2266,6 +2279,131 @@
     render();
   }
 
+  /* ----------------------------------------------------------------------
+     PLACES — à/en/au/aux (going to) and de/du/des (coming from).
+     Rule-generated from each card's `place` type, so answers are correct
+     by construction. Types: city | f (feminine country) | m (masculine) |
+     mv (masculine starting with a vowel) | pl (plural).
+     ---------------------------------------------------------------------- */
+  const PLACE_LABEL = { city: "a city", f: "a feminine country", m: "a masculine country", mv: "masculine, starts with a vowel", pl: "a plural country" };
+  function bareName(fr) {
+    // "la France" → "France", "l'Iran" → "Iran", "les États-Unis" → "États-Unis"
+    return String(fr).replace(/^(le |la |les |l['’]\s?)/i, "").trim();
+  }
+  function placePrep(card, dir) {
+    const name = bareName(card.fr);
+    const vowel = /^[aeiouâàéèêëîïôöûü]/i.test(name);
+    const t = card.place;
+    let word, why;
+    if (dir === "visit") {
+      // visiter takes a direct object: keep the article, no preposition at all
+      if (t === "city") { word = ""; why = "visiter + a city → no article, no preposition"; }
+      else if (t === "pl") { word = "les"; why = "visiter keeps the article → les"; }
+      else if (vowel) { word = "l'"; why = "visiter keeps the article, elided before a vowel → l'"; }
+      else if (t === "f") { word = "la"; why = "visiter keeps the article → la (feminine)"; }
+      else { word = "le"; why = "visiter keeps the article → le (masculine)"; }
+    } else if (dir === "to") {
+      if (t === "city") { word = "à"; why = "a city → à"; }
+      else if (t === "f") { word = "en"; why = "feminine country → en"; }
+      else if (t === "mv") { word = "en"; why = "masculine but starts with a vowel → en, not au"; }
+      else if (t === "pl") { word = "aux"; why = "plural country → aux"; }
+      else { word = "au"; why = "masculine country → au"; }
+    } else {
+      if (t === "m") { word = "du"; why = "masculine country → du"; }
+      else if (t === "pl") { word = "des"; why = "plural country → des"; }
+      else {
+        word = vowel ? "d'" : "de";
+        why = (t === "city" ? "a city" : t === "mv" ? "masculine but starts with a vowel" : "feminine country") + " → " + word;
+      }
+    }
+    // elided forms glue to the name; an empty word means the bare place
+    const phrase = !word ? name : /['’]$/.test(word) ? word + name : word + " " + name;
+    return { word, phrase, why, name };
+  }
+  function startPlaces(dirs, opts) {
+    opts = opts || {};
+    const exit = opts.exit || (() => go("practice"));
+    const pool = DATA.cardIndex.filter(c => c.place);
+    const ROUNDS = 12;
+    let i = 0, right = 0;
+    const mistakes = [];
+    const used = new Set();
+
+    function pick() {
+      const fresh = pool.filter(c => !used.has(c.cid));
+      const list = fresh.length ? fresh : pool;
+      const card = list[Math.floor(Math.random() * list.length)];
+      used.add(card.cid);
+      return { card, dir: dirs[Math.floor(Math.random() * dirs.length)] };
+    }
+    function render() {
+      if (i >= ROUNDS) {
+        recordScore(opts.scoreKey, right, ROUNDS);
+        return finishReport({
+          title: "Pays & villes", right, total: ROUNDS, mistakes,
+          onRetry: () => startPlaces(dirs, opts),
+          onDone: () => opts.onComplete && opts.onComplete()
+        });
+      }
+      const { card, dir } = pick();
+      const sol = placePrep(card, dir);
+      let pool;
+      if (dir === "to") pool = ["à", "en", "au", "aux"];
+      else if (dir === "from") pool = ["de", "d'", "du", "des"];
+      // for visiter, the tempting wrong answers ARE the prepositions
+      else pool = ["le", "la", "les", "l'", "", "en", "au", "à"];
+      const wrong = shuffle(pool.filter(w => w !== sol.word)).slice(0, 3);
+      const options = shuffle([sol.word, ...wrong]);
+      // vary the verb within each group — the preposition depends on the
+      // meaning, not on one memorised verb
+      const STEMS = {
+        to:    [["Je vais", "I'm going to"], ["J'habite", "I live in"], ["Je travaille", "I work in"], ["Je suis", "I'm in"]],
+        from:  [["Je viens", "I come from"], ["J'arrive", "I'm arriving from"], ["Je rentre", "I'm back from"]],
+        visit: [["Je visite", "I'm visiting"], ["Je quitte", "I'm leaving"], ["J'adore", "I love"]]
+      };
+      const pair = STEMS[dir][Math.floor(Math.random() * STEMS[dir].length)];
+      const stem = pair[0] + " ___", stemEn = pair[1] + "…";
+
+      view.innerHTML = `
+        <div class="quiz-wrap">
+          <div class="study-top">
+            <button class="btn btn-ghost" data-quit>${ic("back")} Exit</button>
+            <div class="study-progress"><div class="bar"><span style="width:${Math.round(i / ROUNDS * 100)}%"></span></div></div>
+            <div class="muted" style="font-size:13px">${i + 1}/${ROUNDS}</div>
+          </div>
+          <div class="q-prompt">
+            <div class="muted" style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">${esc(stem)} <span class="gloss-i" style="text-transform:none;letter-spacing:0">(${esc(stemEn)})</span></div>
+            <div class="q-word" style="margin-top:6px">${esc(sol.name)}</div>
+            <div class="q-sub">${esc(card.fr)} <span class="gloss-i">(${esc(card.en)})</span> · ${PLACE_LABEL[card.place]}</div>
+          </div>
+          <div class="options">
+            ${options.map(o => `<button class="option" data-w="${esc(o)}" style="text-align:center;font-family:var(--display);font-size:19px">${esc(!o ? sol.name : /['’]$/.test(o) ? o + sol.name : o + " " + sol.name)}${!o ? ` <span class="gloss-i">(no article)</span>` : ""}</button>`).join("")}
+          </div>
+          <div class="feedback" id="fb"></div>
+        </div>`;
+      $("[data-quit]").addEventListener("click", exit);
+      let answered = false;
+      view.querySelectorAll(".option").forEach(b => b.addEventListener("click", () => {
+        if (answered) return;
+        answered = true;
+        const chosen = b.dataset.w === sol.word;
+        view.querySelectorAll(".option").forEach(o => {
+          o.classList.add("disabled");
+          if (o.dataset.w === sol.word) o.classList.add("correct");
+          else if (o === b) o.classList.add("wrong");
+        });
+        speak(sol.phrase);
+        if (chosen) { right++; awardXP(3); $("#fb").innerHTML = `<span class="ok">✓ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`; }
+        else {
+          mistakes.push({ main: sol.phrase, sub: `you chose “${b.dataset.w}” · ${sol.why}`, say: sol.phrase });
+          $("#fb").innerHTML = `<span class="no">→ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`;
+        }
+        setTimeout(() => { i++; render(); }, chosen ? 1100 : 2100);
+      }));
+    }
+    render();
+  }
+
   /* ----- NUMBERS TRAINER: hear a number, type the digits ----- */
   function startNumbers(range, opts) {
     opts = opts || {};
@@ -2679,7 +2817,7 @@
   buildLex();
   buildFullDict();
   buildVerbTables();
-  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS, VERBS }; // console access for checking generated answers
+  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS, VERBS, placePrep }; // console access for checking generated answers
   refreshChrome();
   go("home");
 
