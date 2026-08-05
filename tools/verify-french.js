@@ -19,6 +19,7 @@
      4. the number engine        (numToFr)
      5. the possessive engine    (possessiveFor)
      6. the place-preposition engine + country data self-consistency
+     7. the subject+verb sentence heads the places drill generates
 
    Known false positives are filtered — see FALSE_POSITIVES below.
    ========================================================================= */
@@ -100,7 +101,7 @@ const numToFr = lift('function numToFr(', 'const numKey =', 'return numToFr;');
 const norm = s => String(s).toLowerCase().replace(/[’]/g, "'").trim().replace(/œ/g, 'oe');
 const strip = s => norm(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-const report = { genderErrors: [], conjErrors: [], engineSweep: {}, numberErrors: [], possessiveErrors: [], placeErrors: [], countryDataErrors: [] };
+const report = { genderErrors: [], conjErrors: [], engineSweep: {}, numberErrors: [], possessiveErrors: [], placeErrors: [], countryDataErrors: [], stemErrors: [] };
 
 /* ---------- CHECK 1: noun genders ---------- */
 function lookupGender(w) {
@@ -228,6 +229,35 @@ DATA.cardIndex.filter(c => c.place).forEach(card => {
   }
 });
 
+/* ---------- CHECK 7: the sentence heads the places drill builds ("Nous allons
+   ___", "J'habite ___"). Every French form must match Lexique for that exact
+   person, and je must elide before a vowel or mute h — and only there. ------ */
+win.__conj = conjPresent;
+const placeStemMod = lift('const PLACE_STEMS = {', 'function startPlaces(',
+  'return { PLACE_STEMS, PLACE_PERSONS, placeStem };', 'const conjPresent = window.__conj;');
+const PERSON_TAG = ['1s', '2s', '3s', '1p', '2p', '3p'];
+let stemsChecked = 0;
+Object.entries(placeStemMod.PLACE_STEMS).forEach(([dir, verbs]) => verbs.forEach(vb => {
+  placeStemMod.PLACE_PERSONS.forEach(per => {
+    stemsChecked++;
+    const got = placeStemMod.placeStem(vb, per);
+    if (!got) return report.stemErrors.push(`${dir} ${vb[0]} ${per[0]}: engine refused the verb`);
+    const m = got.fr.match(/^(J'|\S+ )(.+)$/);
+    const written = (m ? m[1] : ''), form = (m ? m[2] : '').toLowerCase();
+    // 1. the form is what Lexique lists for this verb in this person
+    const want = presByVerb[vb[0]] && presByVerb[vb[0]][PERSON_TAG[per[1]]];
+    if (!want) return report.stemErrors.push(`${vb[0]}: no Lexique entry for ${PERSON_TAG[per[1]]}`);
+    if (!want.has(form)) report.stemErrors.push(`${got.fr}: Lexique has ${[...want].join('/')} for ${vb[0]} ${PERSON_TAG[per[1]]}`);
+    // 2. elision — je + vowel/mute h → j', everything else keeps its subject
+    const shouldElide = per[0] === 'je' && /^[aeiouâàéèêëîïôöûüh]/i.test(form);
+    if (shouldElide && written !== "J'") report.stemErrors.push(`${got.fr}: should elide to J'`);
+    if (!shouldElide && written === "J'") report.stemErrors.push(`${got.fr}: should not elide`);
+    if (!shouldElide && written.trim().toLowerCase() !== per[0]) report.stemErrors.push(`${got.fr}: wrong subject, expected ${per[0]}`);
+    // 3. the English tail exists and reads as a sentence
+    if (!/^(I|you|he|she|we|they)[' ]/.test(got.en)) report.stemErrors.push(`${got.fr}: bad English gloss "${got.en}"`);
+  });
+}));
+
 /* ---------- verdict ---------- */
 const counts = {
   nounGenders: `${nounsChecked} checked, ${report.genderErrors.length} errors`,
@@ -236,12 +266,13 @@ const counts = {
   numbers: `21 cases, ${report.numberErrors.length} errors`,
   possessives: `${nouns.length * 6} combinations, ${report.possessiveErrors.length} errors`,
   places: `${DATA.cardIndex.filter(c => c.place).length * 3} combinations, ${report.placeErrors.length} errors`,
-  countryData: `${report.countryDataErrors.length} inconsistencies`
+  countryData: `${report.countryDataErrors.length} inconsistencies`,
+  drillSentences: `${stemsChecked} subject+verb heads, ${report.stemErrors.length} errors`
 };
 console.log('=== Bonjour French audit ===');
 Object.entries(counts).forEach(([k, v]) => console.log('  ' + k.padEnd(20) + v));
 const totalErrors = report.genderErrors.length + report.conjErrors.length + report.engineSweep.verbsWithErrors +
-  report.numberErrors.length + report.possessiveErrors.length + report.placeErrors.length + report.countryDataErrors.length;
+  report.numberErrors.length + report.possessiveErrors.length + report.placeErrors.length + report.countryDataErrors.length + report.stemErrors.length;
 if (totalErrors) {
   console.log('\n--- details ---');
   console.log(JSON.stringify(report, null, 1));

@@ -2320,6 +2320,37 @@
     const phrase = !word ? name : /['’]$/.test(word) ? word + name : word + " " + name;
     return { word, phrase, why, name };
   }
+  /* The verbs each group is drilled with, and the English tail for each
+     person: [infinitive, after "I", after "he/she", after everything else].
+     The French forms are never written here — they come out of the verified
+     conjugation engine at run time. */
+  const PLACE_STEMS = {
+    to: [["aller", "'m going to", "'s going to", "'re going to"],
+         ["habiter", " live in", " lives in", " live in"],
+         ["travailler", " work in", " works in", " work in"],
+         ["être", "'m in", "'s in", "'re in"]],
+    from: [["venir", " come from", " comes from", " come from"],
+           ["arriver", "'m arriving from", "'s arriving from", "'re arriving from"],
+           ["rentrer", "'m back from", "'s back from", "'re back from"]],
+    visit: [["visiter", "'m visiting", "'s visiting", "'re visiting"],
+            ["quitter", "'m leaving", "'s leaving", "'re leaving"],
+            ["adorer", " love", " loves", " love"]]
+  };
+  /* [subject, which of the six forms, English subject, which English tail] */
+  const PLACE_PERSONS = [
+    ["je", 0, "I", 1], ["tu", 1, "you", 3], ["il", 2, "he", 2], ["elle", 2, "she", 2],
+    ["on", 2, "we", 3], ["nous", 3, "we", 3], ["vous", 4, "you", 3],
+    ["ils", 5, "they", 3], ["elles", 5, "they", 3]
+  ];
+  function placeStem(vb, per) {
+    const conj = conjPresent(vb[0]);
+    if (!conj || !conj.forms) return null;              // engine refused — skip it
+    const form = conj.forms[per[1]];
+    // je + a vowel or mute h elides: j'habite, j'arrive — but je vais, je suis
+    const subj = per[0] === "je" && /^[aeiouâàéèêëîïôöûüh]/i.test(form)
+      ? "J'" : per[0].charAt(0).toUpperCase() + per[0].slice(1) + " ";
+    return { fr: subj + form, en: per[2] + vb[per[3]] };
+  }
   function startPlaces(dirs, opts) {
     opts = opts || {};
     const exit = opts.exit || (() => go("practice"));
@@ -2354,15 +2385,16 @@
       else pool = ["le", "la", "les", "l'", "", "en", "au", "à"];
       const wrong = shuffle(pool.filter(w => w !== sol.word)).slice(0, 3);
       const options = shuffle([sol.word, ...wrong]);
-      // vary the verb within each group — the preposition depends on the
-      // meaning, not on one memorised verb
-      const STEMS = {
-        to:    [["Je vais", "I'm going to"], ["J'habite", "I live in"], ["Je travaille", "I work in"], ["Je suis", "I'm in"]],
-        from:  [["Je viens", "I come from"], ["J'arrive", "I'm arriving from"], ["Je rentre", "I'm back from"]],
-        visit: [["Je visite", "I'm visiting"], ["Je quitte", "I'm leaving"], ["J'adore", "I love"]]
-      };
-      const pair = STEMS[dir][Math.floor(Math.random() * STEMS[dir].length)];
-      const stem = pair[0] + " ___", stemEn = pair[1] + "…";
+      // vary the verb AND the person — the preposition depends on the meaning,
+      // not on one memorised verb, and never on who is speaking
+      let sub = placeStem(PLACE_STEMS[dir][Math.floor(Math.random() * PLACE_STEMS[dir].length)],
+                          PLACE_PERSONS[Math.floor(Math.random() * PLACE_PERSONS.length)]);
+      // if the engine ever refused that verb, walk the group rather than guess
+      if (!sub) for (const vb of PLACE_STEMS[dir]) { sub = placeStem(vb, PLACE_PERSONS[0]); if (sub) break; }
+      if (!sub) { i++; return render(); }   // never invent French we can't verify
+      const stem = sub.fr + " ___", stemEn = sub.en + "…";
+      // the whole sentence, for the audio and the correction line
+      const sentence = sub.fr + " " + sol.phrase;
 
       view.innerHTML = `
         <div class="quiz-wrap">
@@ -2392,11 +2424,11 @@
           if (o.dataset.w === sol.word) o.classList.add("correct");
           else if (o === b) o.classList.add("wrong");
         });
-        speak(sol.phrase);
-        if (chosen) { right++; awardXP(3); $("#fb").innerHTML = `<span class="ok">✓ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`; }
+        speak(sentence);
+        if (chosen) { right++; awardXP(3); $("#fb").innerHTML = `<span class="ok">✓ ${esc(sentence)} — ${esc(sol.why)}</span>`; }
         else {
-          mistakes.push({ main: sol.phrase, sub: `you chose “${b.dataset.w}” · ${sol.why}`, say: sol.phrase });
-          $("#fb").innerHTML = `<span class="no">→ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`;
+          mistakes.push({ main: sentence, sub: `you chose “${b.dataset.w}” · ${sol.why}`, say: sentence });
+          $("#fb").innerHTML = `<span class="no">→ ${esc(sentence)} — ${esc(sol.why)}</span>`;
         }
         setTimeout(() => { i++; render(); }, chosen ? 1100 : 2100);
       }));
