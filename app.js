@@ -14,6 +14,7 @@
   const ICONS = {
     home: "<path d='M3 10.5 12 4l9 6.5'/><path d='M5 9.7V20h5v-6h4v6h5V9.7'/>",
     route: "<circle cx='6' cy='19' r='2.1'/><circle cx='18' cy='6' r='2.1'/><path d='M9 19h6.3a2.5 2.5 0 0 0 0-5h-6.6a2.5 2.5 0 0 1 0-5H15'/>",
+    map: "<path d='M9 4.5 3.5 6.8v12.7L9 17.2l6 2.3 5.5-2.3V4.5L15 6.8Z'/><path d='M9 4.5v12.7'/><path d='M15 6.8v12.7'/>",
     refresh: "<path d='M3.5 12a8.5 8.5 0 0 1 14.3-6.2L21 8'/><path d='M21 3.5V8h-4.5'/><path d='M20.5 12a8.5 8.5 0 0 1-14.3 6.2L3 16'/><path d='M3 20.5V16h4.5'/>",
     target: "<circle cx='12' cy='12' r='8.5'/><circle cx='12' cy='12' r='4.6'/><circle cx='12' cy='12' r='1.4' fill='currentColor' stroke='none'/>",
     book: "<path d='M12 6.6C10.4 5.4 7.8 4.9 4.6 5.3a1 1 0 0 0-.9 1v11a1 1 0 0 0 1.1 1c3-.4 5.3.1 7.2 1.4 1.9-1.3 4.2-1.8 7.2-1.4a1 1 0 0 0 1.1-1v-11a1 1 0 0 0-.9-1c-3.2-.4-5.8.1-7.4 1.3z'/><path d='M12 6.6V19.8'/>",
@@ -1483,6 +1484,7 @@
         ${modeTile("grid", "chip-pink", "Match-up", "Match French words to English. Beat the clock.", "match")}
         ${modeTile("compass", "chip-green", "Pays & villes", "à, au, aux, en · de, du, des — countries and cities.", "places")}
         ${modeTile("users", "chip-pink", "Possessifs", "mon, ma, mes… match the possessive to the noun.", "poss")}
+        ${modeTile("map", "chip-blue", "Où est-ce ?", "du, de la, des · au, à la, aux — places around town.", "ville")}
         ${modeTile("bolt", "chip-orange", "Tricky words", "Extra rounds on the words you keep missing.", "hard")}
       </div>`;
     view.querySelectorAll("[data-mode]").forEach(t => t.addEventListener("click", () => practicePick(t.dataset.mode)));
@@ -1515,6 +1517,18 @@
       return pickList("Going or coming?", SETS.map(s => ({ id: s.id, name: s.name, sub: s.note + scoreSuffix("places:" + s.id), icon: ic("compass"), chip: "chip-green" })), id => {
         const s = SETS.find(x => x.id === id);
         startPlaces(s.dirs, { scoreKey: "places:" + id, exit: () => practicePick("places"), onComplete: done });
+      }, "practice");
+    }
+    if (mode === "ville") {
+      const SETS = [
+        { id: "de",    kinds: ["de"],               name: "Où est-ce ?", note: "près de, à côté de… — du, de la, de l', des" },
+        { id: "a",     kinds: ["a"],                name: "Je vais…", note: "au, à la, à l', aux" },
+        { id: "plain", kinds: ["plain"],            name: "Sans « de »", note: "dans, devant, derrière — nothing contracts" },
+        { id: "all",   kinds: ["de", "a", "plain"], name: "Tout mélangé", note: "all three together" }
+      ];
+      return pickList("Which preposition?", SETS.map(s => ({ id: s.id, name: s.name, sub: s.note + scoreSuffix("ville:" + s.id), icon: ic("map"), chip: "chip-blue" })), id => {
+        const s = SETS.find(x => x.id === id);
+        startCityPreps(s.kinds, { scoreKey: "ville:" + id, exit: () => practicePick("ville"), onComplete: done });
       }, "practice");
     }
     if (mode === "poss") {
@@ -2436,6 +2450,127 @@
     render();
   }
 
+  /* -------------------------------------------------------------------------
+     CITY PREPOSITIONS + THE CONTRACTED ARTICLE
+     de + le = du, de + les = des — but de la and de l' never move, and the
+     prepositions with no "de" (dans, devant, entre…) don't contract at all.
+     Everything below is derived from the card's article, never memorised.
+     ---------------------------------------------------------------------- */
+  const VILLE_PREPS = {
+    de: [["près de", "near"], ["loin de", "far from"], ["en face de", "opposite"],
+         ["à côté de", "next to"], ["à gauche de", "to the left of"], ["à droite de", "to the right of"]],
+    /* "entre" is deliberately absent — it needs two complements
+       ("entre X et Y"), so it can't fill a single-slot prompt. */
+    plain: [["dans", "in"], ["sur", "on"], ["sous", "under"],
+            ["devant", "in front of"], ["derrière", "behind"]],
+    a: [["Je vais", "I'm going to"], ["Nous allons", "We're going to"], ["On se retrouve", "Let's meet at"]]
+  };
+  const VILLE_OPTIONS = { de: ["du", "de la", "de l'", "des"], plain: ["le", "la", "l'", "les"], a: ["au", "à la", "à l'", "aux"] };
+  /* the four answers, keyed by the article the noun already carries */
+  function cityForm(kind, art) {
+    if (kind === "de") {
+      if (art === "les") return { word: "des", why: "de + les = des" };
+      if (art === "l'") return { word: "de l'", why: "de + l' doesn't contract — it stays de l'" };
+      if (art === "la") return { word: "de la", why: "de + la doesn't contract — it stays de la" };
+      return { word: "du", why: "de + le = du" };
+    }
+    if (kind === "a") {
+      if (art === "les") return { word: "aux", why: "à + les = aux" };
+      if (art === "l'") return { word: "à l'", why: "à + l' doesn't contract — it stays à l'" };
+      if (art === "la") return { word: "à la", why: "à + la doesn't contract — it stays à la" };
+      return { word: "au", why: "à + le = au" };
+    }
+    return { word: art, why: "no de, so the article stays " + art };
+  }
+  /* a card, optionally in the plural, split into the parts the drill needs */
+  function cityCard(card, plural) {
+    const src = plural ? card.pl : card.fr;
+    if (!src) return null;
+    const s = splitArticle(src);
+    const art = s.art.trim();
+    if (!["le", "la", "les", "l'", "l’"].includes(art)) return null;
+    return { art: art === "l’" ? "l'" : art, head: s.head, plural: !!plural };
+  }
+  function cityPhrase(kind, prep, part) {
+    const sol = cityForm(kind, part.art);
+    const glue = /['’]$/.test(sol.word) ? sol.word + part.head : sol.word + " " + part.head;
+    const stem = kind === "de" ? prep[0].replace(/\s*de$/, "") : prep[0];
+    return { word: sol.word, why: sol.why, phrase: stem + " " + glue, glue };
+  }
+
+  function startCityPreps(kinds, opts) {
+    opts = opts || {};
+    const exit = opts.exit || (() => go("practice"));
+    const pool = (DATA.deckById["ville"] || { cards: [] }).cards.filter(c => c.pl);
+    const ROUNDS = 12;
+    let i = 0, right = 0;
+    const mistakes = [];
+    const used = new Set();
+
+    function render() {
+      if (i >= ROUNDS) {
+        recordScore(opts.scoreKey, right, ROUNDS);
+        return finishReport({
+          title: "Où est-ce ?", right, total: ROUNDS, mistakes,
+          onRetry: () => startCityPreps(kinds, opts),
+          onDone: () => opts.onComplete && opts.onComplete()
+        });
+      }
+      const fresh = pool.filter(c => !used.has(c.fr));
+      const list = fresh.length ? fresh : pool;
+      const card = list[Math.floor(Math.random() * list.length)];
+      const kind = kinds[Math.floor(Math.random() * kinds.length)];
+      // every fourth round or so, ask it in the plural — that's where des lives
+      const part = cityCard(card, Math.random() < 0.28) || cityCard(card, false);
+      if (!part) { used.add(card.fr); return render(); }
+      used.add(card.fr);
+      const prep = VILLE_PREPS[kind][Math.floor(Math.random() * VILLE_PREPS[kind].length)];
+      const sol = cityPhrase(kind, prep, part);
+      const options = shuffle(VILLE_OPTIONS[kind].slice());
+      const label = part.plural ? "plural" : part.art === "l'"
+        ? (card.g === "f" ? "feminine, starts with a vowel" : "masculine, starts with a vowel")
+        : card.g === "f" ? "feminine" : "masculine";
+
+      view.innerHTML = `
+        <div class="quiz-wrap">
+          <div class="study-top">
+            <button class="btn btn-ghost" data-quit>${ic("back")} Exit</button>
+            <div class="study-progress"><div class="bar"><span style="width:${Math.round(i / ROUNDS * 100)}%"></span></div></div>
+            <div class="muted" style="font-size:13px">${i + 1}/${ROUNDS}</div>
+          </div>
+          <div class="q-prompt">
+            <div class="muted" style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600">${esc(kind === "de" ? prep[0].replace(/\s*de$/, "") : prep[0])} ___ <span class="gloss-i" style="text-transform:none;letter-spacing:0">(${esc(prep[1])}…)</span></div>
+            <div class="q-word" style="margin-top:6px">${esc(part.head)}</div>
+            <div class="q-sub">${esc(card.en)} · ${label}</div>
+          </div>
+          <div class="options">
+            ${options.map(o => `<button class="option" data-w="${esc(o)}" style="text-align:center;font-family:var(--display);font-size:19px">${esc(/['’]$/.test(o) ? o + part.head : o + " " + part.head)}</button>`).join("")}
+          </div>
+          <div class="feedback" id="fb"></div>
+        </div>`;
+      $("[data-quit]").addEventListener("click", exit);
+      let answered = false;
+      view.querySelectorAll(".option").forEach(b => b.addEventListener("click", () => {
+        if (answered) return;
+        answered = true;
+        const chosen = b.dataset.w === sol.word;
+        view.querySelectorAll(".option").forEach(o => {
+          o.classList.add("disabled");
+          if (o.dataset.w === sol.word) o.classList.add("correct");
+          else if (o === b) o.classList.add("wrong");
+        });
+        speak(sol.phrase);
+        if (chosen) { right++; awardXP(3); $("#fb").innerHTML = `<span class="ok">✓ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`; }
+        else {
+          mistakes.push({ main: sol.phrase, sub: `you chose “${b.dataset.w}” · ${sol.why}`, say: sol.phrase });
+          $("#fb").innerHTML = `<span class="no">→ ${esc(sol.phrase)} — ${esc(sol.why)}</span>`;
+        }
+        setTimeout(() => { i++; render(); }, chosen ? 1100 : 2100);
+      }));
+    }
+    render();
+  }
+
   /* ----- NUMBERS TRAINER: hear a number, type the digits ----- */
   function startNumbers(range, opts) {
     opts = opts || {};
@@ -2849,7 +2984,7 @@
   buildLex();
   buildFullDict();
   buildVerbTables();
-  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS, VERBS, placePrep }; // console access for checking generated answers
+  window.__fr = { numToFr, checkNumWord, conjPresent, conjPasse, possessiveFor, POSS_OWNERS, VERBS, placePrep, cityForm, cityCard, cityPhrase }; // console access for checking generated answers
   refreshChrome();
   go("home");
 

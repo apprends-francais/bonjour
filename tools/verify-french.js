@@ -20,6 +20,7 @@
      5. the possessive engine    (possessiveFor)
      6. the place-preposition engine + country data self-consistency
      7. the subject+verb sentence heads the places drill generates
+     8. the city-preposition contractions (de+le=du) + the ville deck plurals
 
    Known false positives are filtered — see FALSE_POSITIVES below.
    ========================================================================= */
@@ -101,7 +102,7 @@ const numToFr = lift('function numToFr(', 'const numKey =', 'return numToFr;');
 const norm = s => String(s).toLowerCase().replace(/[’]/g, "'").trim().replace(/œ/g, 'oe');
 const strip = s => norm(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-const report = { genderErrors: [], conjErrors: [], engineSweep: {}, numberErrors: [], possessiveErrors: [], placeErrors: [], countryDataErrors: [], stemErrors: [] };
+const report = { genderErrors: [], conjErrors: [], engineSweep: {}, numberErrors: [], possessiveErrors: [], placeErrors: [], countryDataErrors: [], stemErrors: [], cityErrors: [] };
 
 /* ---------- CHECK 1: noun genders ---------- */
 function lookupGender(w) {
@@ -258,6 +259,51 @@ Object.entries(placeStemMod.PLACE_STEMS).forEach(([dir, verbs]) => verbs.forEach
   });
 }));
 
+/* ---------- CHECK 8: the city-preposition engine + the deck's plural forms.
+   de + le = du and de + les = des; de la / de l' / à la / à l' must NOT move.
+   Plurals are checked against Lexique so hôpital → hôpitaux can't be guessed. */
+const cityMod = lift('const VILLE_PREPS = {', 'function startCityPreps(',
+  'return { VILLE_PREPS, VILLE_OPTIONS, cityForm, cityCard, cityPhrase };', PRELUDE);
+const CITY_WANT = {
+  de: { le: 'du', les: 'des', la: 'de la', "l'": "de l'" },
+  a: { le: 'au', les: 'aux', la: 'à la', "l'": "à l'" },
+  plain: { le: 'le', les: 'les', la: 'la', "l'": "l'" }
+};
+const villeDeck = (DATA.decks.find(d => d.id === 'ville') || { cards: [] }).cards;
+let cityChecked = 0;
+// plural nouns must exist in Lexique as the plural of the singular lemma
+const pluralByLemma = {};
+for (let i = 1; i < rows.length; i++) {
+  const c = rows[i].split('\t');
+  if (c.length < 6 || c[iCgram] !== 'NOM') continue;
+  if ((c[5] || '') === 'p') (pluralByLemma[norm(c[iLemme])] = pluralByLemma[norm(c[iLemme])] || new Set()).add(norm(c[iOrtho]));
+}
+villeDeck.forEach(card => {
+  const sing = bare(card.fr), plur = bare(card.pl || '');
+  if (!card.pl) return report.cityErrors.push(`${card.fr}: no plural given`);
+  if (!/^les /i.test(card.pl)) report.cityErrors.push(`${card.pl}: plural should carry "les"`);
+  if (!/\s/.test(plur)) {                       // single words only — Lexique has no "galeries d'art"
+    const want = pluralByLemma[norm(sing)];
+    if (want && !want.has(norm(plur))) report.cityErrors.push(`${card.fr}: plural "${plur}", Lexique has ${[...want].join('/')}`);
+  }
+  [false, true].forEach(isPl => {
+    const part = cityMod.cityCard(card, isPl);
+    if (!part) return report.cityErrors.push(`${card.fr}${isPl ? ' (pl)' : ''}: no article could be read`);
+    if (isPl && part.art !== 'les') report.cityErrors.push(`${card.pl}: plural article should be les, got "${part.art}"`);
+    ['de', 'a', 'plain'].forEach(kind => {
+      cityChecked++;
+      const got = cityMod.cityForm(kind, part.art).word, want = CITY_WANT[kind][part.art];
+      if (got !== want) report.cityErrors.push(`${kind} + ${part.art} (${card.fr}): got "${got}" want "${want}"`);
+      // the rendered phrase must elide onto the noun and never read "de le"/"à les"
+      const ph = cityMod.cityPhrase(kind, cityMod.VILLE_PREPS[kind][0], part).phrase;
+      if (/\b(de le|de les|à le|à les)\b/.test(ph)) report.cityErrors.push(`${ph}: uncontracted form leaked through`);
+      if (/['’]\s/.test(ph)) report.cityErrors.push(`${ph}: elided article should glue to the noun`);
+    });
+  });
+});
+// "entre" takes two complements, so it must never appear as a one-slot prompt
+if (cityMod.VILLE_PREPS.plain.some(p => p[0] === 'entre')) report.cityErrors.push('entre cannot fill a single-slot prompt');
+
 /* ---------- verdict ---------- */
 const counts = {
   nounGenders: `${nounsChecked} checked, ${report.genderErrors.length} errors`,
@@ -267,12 +313,13 @@ const counts = {
   possessives: `${nouns.length * 6} combinations, ${report.possessiveErrors.length} errors`,
   places: `${DATA.cardIndex.filter(c => c.place).length * 3} combinations, ${report.placeErrors.length} errors`,
   countryData: `${report.countryDataErrors.length} inconsistencies`,
-  drillSentences: `${stemsChecked} subject+verb heads, ${report.stemErrors.length} errors`
+  drillSentences: `${stemsChecked} subject+verb heads, ${report.stemErrors.length} errors`,
+  cityArticles: `${cityChecked} contractions + ${villeDeck.length} plurals, ${report.cityErrors.length} errors`
 };
 console.log('=== Bonjour French audit ===');
 Object.entries(counts).forEach(([k, v]) => console.log('  ' + k.padEnd(20) + v));
 const totalErrors = report.genderErrors.length + report.conjErrors.length + report.engineSweep.verbsWithErrors +
-  report.numberErrors.length + report.possessiveErrors.length + report.placeErrors.length + report.countryDataErrors.length + report.stemErrors.length;
+  report.numberErrors.length + report.possessiveErrors.length + report.placeErrors.length + report.countryDataErrors.length + report.stemErrors.length + report.cityErrors.length;
 if (totalErrors) {
   console.log('\n--- details ---');
   console.log(JSON.stringify(report, null, 1));

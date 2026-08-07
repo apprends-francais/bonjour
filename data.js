@@ -308,6 +308,40 @@ const DATA = {
       ]
     },
     {
+      /* Lieux de la ville — the places the audio-guided walk moves between.
+         `pl` is the exact plural: the drill needs it to build "près des …",
+         and hôpital → hôpitaux is not something a learner can guess. */
+      id: "ville",
+      name: "En ville",
+      blurb: "The places a walk through town takes you past.",
+      cards: [
+        { fr: "le fleuve", en: "river", pos: "noun", g: "m", pl: "les fleuves", ex: { fr: "Le marché est près du fleuve.", en: "The market is near the river." } },
+        { fr: "le marché", en: "market", pos: "noun", g: "m", pl: "les marchés", ex: { fr: "Direction le marché pour acheter des souvenirs.", en: "Head for the market to buy souvenirs." } },
+        { fr: "l'avenue", en: "avenue", pos: "noun", g: "f", pl: "les avenues", ex: { fr: "Tournez à droite dans l'avenue.", en: "Turn right into the avenue." } },
+        { fr: "le quartier", en: "neighbourhood", pos: "noun", g: "m", pl: "les quartiers", ex: { fr: "Une journée dans le quartier français.", en: "A day in the French quarter." } },
+        { fr: "la cathédrale", en: "cathedral", pos: "noun", g: "f", pl: "les cathédrales", ex: { fr: "Un selfie en face de la cathédrale.", en: "A selfie opposite the cathedral." } },
+        { fr: "le musée", en: "museum", pos: "noun", g: "m", pl: "les musées", ex: { fr: "Nous sommes près des musées.", en: "We are near the museums." } },
+        { fr: "la station", en: "station (metro)", pos: "noun", g: "f", pl: "les stations", ex: { fr: "Départ : station Dumaine.", en: "Departure: Dumaine station." } },
+        { fr: "le restaurant", en: "restaurant", pos: "noun", g: "m", pl: "les restaurants", ex: { fr: "Le restaurant est à côté du parc.", en: "The restaurant is next to the park." } },
+        { fr: "le pont", en: "bridge", pos: "noun", g: "m", pl: "les ponts", ex: { fr: "L'hôtel est loin du pont.", en: "The hotel is far from the bridge." } },
+        { fr: "la place", en: "square", pos: "noun", g: "f", pl: "les places", ex: { fr: "La place est devant l'église.", en: "The square is in front of the church." } },
+        { fr: "l'église", en: "church", pos: "noun", g: "f", pl: "les églises", ex: { fr: "Le café est en face de l'église.", en: "The café is opposite the church." } },
+        { fr: "la banque", en: "bank", pos: "noun", g: "f", pl: "les banques", ex: { fr: "La banque est entre la poste et le parc.", en: "The bank is between the post office and the park." } },
+        { fr: "la poste", en: "post office", pos: "noun", g: "f", pl: "les postes", ex: { fr: "Où est la poste, s'il vous plaît ?", en: "Where is the post office, please?" } },
+        { fr: "la pharmacie", en: "pharmacy", pos: "noun", g: "f", pl: "les pharmacies", ex: { fr: "Il y a une pharmacie à côté de la banque.", en: "There's a pharmacy next to the bank." } },
+        { fr: "le parc", en: "park", pos: "noun", g: "m", pl: "les parcs", ex: { fr: "Les enfants sont dans le parc.", en: "The children are in the park." } },
+        { fr: "la boulangerie", en: "bakery", pos: "noun", g: "f", pl: "les boulangeries", ex: { fr: "J'achète du pain à la boulangerie.", en: "I buy bread at the bakery." } },
+        { fr: "le magasin", en: "shop", pos: "noun", g: "m", pl: "les magasins", ex: { fr: "Le magasin est derrière la place.", en: "The shop is behind the square." } },
+        { fr: "l'école", en: "school", pos: "noun", g: "f", pl: "les écoles", ex: { fr: "Nous sommes devant l'école, près de l'entrée.", en: "We are in front of the school, near the entrance." } },
+        { fr: "l'hôpital", en: "hospital", pos: "noun", g: "m", pl: "les hôpitaux", ex: { fr: "L'hôpital est loin du centre.", en: "The hospital is far from the centre." } },
+        { fr: "la bibliothèque", en: "library", pos: "noun", g: "f", pl: "les bibliothèques", ex: { fr: "La bibliothèque est à gauche du musée.", en: "The library is to the left of the museum." } },
+        { fr: "le cinéma", en: "cinema", pos: "noun", g: "m", pl: "les cinémas", ex: { fr: "On se retrouve devant le cinéma.", en: "Let's meet in front of the cinema." } },
+        { fr: "le théâtre", en: "theatre", pos: "noun", g: "m", pl: "les théâtres", ex: { fr: "Le théâtre est en face de la mairie.", en: "The theatre is opposite the town hall." } },
+        { fr: "la mairie", en: "town hall", pos: "noun", g: "f", pl: "les mairies", ex: { fr: "La mairie est sur la place.", en: "The town hall is on the square." } },
+        { fr: "l'entrée", en: "entrance", pos: "noun", g: "f", pl: "les entrées", ex: { fr: "Rendez-vous près de l'entrée.", en: "Meet near the entrance." } }
+      ]
+    },
+    {
       id: "nationalities",
       name: "Nationalities",
       blurb: "Say where you're from — masculine / feminine forms.",
@@ -546,6 +580,61 @@ const DATA = {
         <p>The pair worth learning by heart, because they mean nearly the same thing with opposite grammar:</p>
         <p class="ex">Je quitte la France.</p> <span class="gloss-i">(direct object — no preposition)</span>
         <p class="ex">Je pars de France.</p> <span class="gloss-i">(preposition — no article)</span>`
+    },
+    {
+      id: "un-vs-le",
+      title: "un or le? Naming places in town",
+      summary: "Indefinite for something not yet pinned down, definite once everyone knows which one.",
+      body: `
+        <p>You already know both sets of articles. This lesson is about <b>choosing</b> between them — the question your class put as <i>information non précisée</i> vs <i>information précisée</i>.</p>
+        <table class="g-table">
+          <tr><th></th><th>indéfinis — “a / some”<br><span class="gloss-i">information not pinned down</span></th><th>définis — “the”<br><span class="gloss-i">information pinned down</span></th></tr>
+          <tr><td>masculine singular</td><td><b>un</b> fleuve</td><td><b>le</b> fleuve Mississippi</td></tr>
+          <tr><td>feminine singular</td><td><b>une</b> rue</td><td><b>la</b> rue Decatur</td></tr>
+          <tr><td>singular before a vowel</td><td><b>une</b> école</td><td><b>l'</b>école</td></tr>
+          <tr><td>plural</td><td><b>des</b> musées</td><td><b>les</b> musées</td></tr>
+        </table>
+        <p class="gloss">un/une/des = a, an, some · le/la/l'/les = the</p>
+        <p>The same place takes either one — it depends on whether your listener already knows <i>which</i> one you mean:</p>
+        <p class="ex">Il y a <b>un</b> marché dans le quartier.</p> <span class="gloss-i">(There's a market in the neighbourhood — you're introducing it.)</span>
+        <p class="ex"><b>Le</b> marché est près du fleuve.</p> <span class="gloss-i">(The market is near the river — we both know the one.)</span>
+        <p class="tip">⚑ Only the <b>definite</b> articles contract. <span class="ex">près du fleuve</span> comes from <i>de + le</i>; <span class="ex">près d'un fleuve</span> never changes, because <i>un</i> is indefinite. That rule is in <b>Prepositions of place</b>.</p>
+        <p class="tip">💡 First mention introduces, second mention points back. It's the same instinct as English <i>a</i> → <i>the</i>: “I saw <i>a</i> church. <i>The</i> church was closed.”</p>`
+    },
+    {
+      id: "prepositions-lieu",
+      title: "Prepositions of place & the contracted article",
+      summary: "dans, devant, près de… and the one rule that turns de + le into du.",
+      body: `
+        <p>Twelve words place one thing against another. Your class grouped them as opposites — that's the fastest way to hold them:</p>
+        <table class="g-table">
+          <tr><td><b>dans</b> <span class="gloss-i">(in)</span></td><td><b>entre</b> <span class="gloss-i">(between)</span></td></tr>
+          <tr><td><b>sur</b> <span class="gloss-i">(on)</span></td><td>≠ <b>sous</b> <span class="gloss-i">(under)</span></td></tr>
+          <tr><td><b>devant</b> <span class="gloss-i">(in front of)</span></td><td>≠ <b>derrière</b> <span class="gloss-i">(behind)</span></td></tr>
+          <tr><td><b>près de</b> <span class="gloss-i">(near)</span></td><td>≠ <b>loin de</b> <span class="gloss-i">(far from)</span></td></tr>
+          <tr><td><b>à gauche de</b> <span class="gloss-i">(to the left of)</span></td><td>≠ <b>à droite de</b> <span class="gloss-i">(to the right of)</span></td></tr>
+          <tr><td><b>en face de</b> <span class="gloss-i">(opposite)</span></td><td><b>à côté de</b> <span class="gloss-i">(next to)</span></td></tr>
+        </table>
+        <p><b>Now the rule that actually costs marks.</b> Six of those twelve end in <b>de</b>. When <i>de</i> lands on <b>le</b> or <b>les</b>, French refuses to say it and squashes the two together:</p>
+        <table class="g-table">
+          <tr><th>de +</th><th>becomes</th><th>example</th></tr>
+          <tr><td>de + <b>le</b></td><td><b>du</b></td><td>près <b>du</b> fleuve <span class="gloss-i">(near the river)</span></td></tr>
+          <tr><td>de + <b>les</b></td><td><b>des</b></td><td>près <b>des</b> musées <span class="gloss-i">(near the museums)</span></td></tr>
+          <tr><td>de + <b>la</b></td><td><b>de la</b> — no change</td><td>près <b>de la</b> cathédrale <span class="gloss-i">(near the cathedral)</span></td></tr>
+          <tr><td>de + <b>l'</b></td><td><b>de l'</b> — no change</td><td>près <b>de l'</b>église <span class="gloss-i">(near the church)</span></td></tr>
+        </table>
+        <p class="tip">⚑ <span class="ex">de le</span> and <span class="ex">de les</span> do not exist in French. If you ever write them, the contraction is what you wanted.</p>
+        <p><b>à</b> behaves exactly the same way — you already met it on countries, and it works on places in town too:</p>
+        <table class="g-table">
+          <tr><td>à + <b>le</b> → <b>au</b></td><td>Je vais <b>au</b> marché. <span class="gloss-i">(to the market)</span></td></tr>
+          <tr><td>à + <b>les</b> → <b>aux</b></td><td>Je vais <b>aux</b> toilettes. <span class="gloss-i">(to the toilets)</span></td></tr>
+          <tr><td>à + <b>la</b> → <b>à la</b></td><td>Je vais <b>à la</b> banque. <span class="gloss-i">(to the bank)</span></td></tr>
+          <tr><td>à + <b>l'</b> → <b>à l'</b></td><td>Je vais <b>à l'</b>école. <span class="gloss-i">(to the school)</span></td></tr>
+        </table>
+        <p class="tip">💡 The trap runs the other way too: <b>dans, sur, sous, devant, derrière</b> and <b>entre</b> have no <i>de</i>, so nothing contracts. It's <span class="ex">devant le musée</span> <span class="gloss-i">(in front of the museum)</span> — never “devant du musée”.</p>
+        <p class="ex">Nous sommes devant l'école, près de l'entrée.</p> <span class="gloss-i">(We're in front of the school, near the entrance.)</span>
+        <p class="ex">Le marché se trouve entre la rue Decatur et le fleuve.</p> <span class="gloss-i">(The market is between Decatur Street and the river.)</span>
+        <p class="tip">Drill the contraction in Practice → <b>Où est-ce ?</b></p>`
     },
     {
       id: "possessifs",
@@ -817,6 +906,11 @@ const DATA = {
         { fr: "C'est loin d'ici ?", en: "Is it far from here?" },
         { fr: "Tournez à gauche.", en: "Turn left." },
         { fr: "Continuez tout droit.", en: "Keep going straight." },
+        { fr: "Tournez à droite dans la rue Royal.", en: "Turn right into Royal Street." },
+        { fr: "Prenez à droite, rue Decatur.", en: "Take a right, Decatur Street." },
+        { fr: "Le marché se trouve entre la rue et le fleuve.", en: "The market is between the street and the river." },
+        { fr: "Le restaurant est à côté du parc.", en: "The restaurant is next to the park." },
+        { fr: "C'est en face de la cathédrale.", en: "It's opposite the cathedral." },
         { fr: "À quelle heure part le train ?", en: "What time does the train leave?" }
       ]
     }
@@ -918,9 +1012,9 @@ const DATA = {
     {
       id: "u5",
       title: "Getting Around",
-      goal: "Find your way, ask questions, talk about countries.",
-      decks: ["travel", "questions", "places"],
-      grammar: ["negation", "aller-futur", "pays-villes", "verbes-lieux"],
+      goal: "Find your way around town, ask questions, talk about countries.",
+      decks: ["travel", "questions", "places", "ville"],
+      grammar: ["negation", "aller-futur", "pays-villes", "verbes-lieux", "un-vs-le", "prepositions-lieu"],
       phrases: ["directions"],
       verbs: ["aller", "venir", "prendre"],
       dialogue: "demander-chemin"
